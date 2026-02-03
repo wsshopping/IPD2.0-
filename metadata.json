@@ -1,0 +1,5 @@
+{
+  "name": "IPD 度量指挥中心",
+  "description": "集成产品开发 (IPD) 度量可视化系统，包含战略仪表盘、项目执行跟踪及详细的过程指标矩阵。",
+  "requestFramePermissions": []
+}
