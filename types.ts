@@ -1,4 +1,5 @@
-export type ViewMode = 'system-map' | 'product-dashboard' | 'project-detail';
+
+export type ViewMode = 'portfolio-dashboard' | 'system-map' | 'product-dashboard' | 'project-detail';
 
 export interface Metric {
   id: string;
