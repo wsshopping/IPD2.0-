@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, Layers, Target, Activity, ArrowRight, Wallet, Zap, BarChart, ChevronRight, X, Search, Filter, AlertTriangle, Globe, Users, ShieldAlert, Scale, BrainCircuit, Trophy, Star, ThumbsUp, Heart, Briefcase, LayoutGrid, AlertCircle, CheckCircle2, Flag, Timer, Gauge, BookOpen } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, PieChart, Layers, Target, Activity, ArrowRight, Wallet, Zap, BarChart, ChevronRight, X, Search, Filter, AlertTriangle, Globe, Users, ShieldAlert, Scale, BrainCircuit, Trophy, Star, ThumbsUp, Heart, Briefcase, LayoutGrid, AlertCircle, CheckCircle2, Flag, Timer, Gauge, BookOpen, Cpu, Sparkles } from 'lucide-react';
 import { PROJECTS_LIST } from '../constants';
 import { Project } from '../types';
 
@@ -145,27 +145,90 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            </table>
          );
        case 'manpower':
+         const groupAiStats = { total: 850, algo: 350, eng: 400, native: 100 };
          return (
           <div className="space-y-6 p-4">
             {/* Summary Cards */}
             <div className="grid grid-cols-4 gap-4">
                <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
                   <div className="text-indigo-600 text-xs font-bold uppercase">总编制 (Headcount)</div>
-                  <div className="text-2xl font-bold text-indigo-900 mt-1">2,450</div>
+                  <div className="text-2xl font-bold text-indigo-900 mt-1">3,050</div>
                </div>
                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                   <div className="text-blue-600 text-xs font-bold uppercase">在岗人数</div>
-                  <div className="text-2xl font-bold text-blue-900 mt-1">2,380</div>
+                  <div className="text-2xl font-bold text-blue-900 mt-1">2,980</div>
                </div>
                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
                   <div className="text-emerald-600 text-xs font-bold uppercase">战略投入占比</div>
-                  <div className="text-2xl font-bold text-emerald-900 mt-1">72%</div>
+                  <div className="text-2xl font-bold text-emerald-900 mt-1">75%</div>
                </div>
                <div className="bg-amber-50 p-4 rounded-lg border border-amber-100">
                   <div className="text-amber-600 text-xs font-bold uppercase">空缺率</div>
-                  <div className="text-2xl font-bold text-amber-900 mt-1">2.8%</div>
+                  <div className="text-2xl font-bold text-amber-900 mt-1">2.3%</div>
                </div>
             </div>
+
+            {/* AI Talent Structure (Group Level) */}
+             <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-xl p-5 relative overflow-hidden">
+                <div className="flex items-center gap-2 mb-4 relative z-10">
+                    <div className="p-1.5 bg-violet-100 rounded text-violet-600">
+                       <BrainCircuit className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-slate-800">集团 AI 人才战略透视 (Group AI Talent Structure)</h4>
+                    <span className="bg-violet-100 text-violet-700 text-xs px-2 py-0.5 rounded-full font-bold ml-2">
+                        渗透率 28%
+                    </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+                    {/* Total AI */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-violet-100/50">
+                        <span className="text-xs text-slate-500 mb-1">AI 专职人才总数</span>
+                        <div className="flex items-baseline gap-2">
+                           <span className="text-2xl font-bold text-slate-800">{groupAiStats.total}</span>
+                           <span className="text-xs font-normal text-slate-400">人</span>
+                        </div>
+                    </div>
+                    
+                    {/* Algorithm Breakdown */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-indigo-100/50 hover:bg-white/80 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                            <BrainCircuit className="w-4 h-4 text-indigo-500" />
+                            <span className="text-xs font-bold text-slate-600">AI 算法 (Algorithm)</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-xl font-bold text-slate-800">{groupAiStats.algo}</span>
+                            <span className="text-xs text-slate-400">{Math.round((groupAiStats.algo/groupAiStats.total)*100)}%</span>
+                        </div>
+                    </div>
+
+                    {/* Engineering Breakdown */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-cyan-100/50 hover:bg-white/80 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Cpu className="w-4 h-4 text-cyan-600" />
+                            <span className="text-xs font-bold text-slate-600">AI 工程 (Engineering)</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-xl font-bold text-slate-800">{groupAiStats.eng}</span>
+                            <span className="text-xs text-slate-400">{Math.round((groupAiStats.eng/groupAiStats.total)*100)}%</span>
+                        </div>
+                    </div>
+
+                    {/* AI Native Breakdown */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-purple-100/50 hover:bg-white/80 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="w-4 h-4 text-purple-600" />
+                            <span className="text-xs font-bold text-slate-600">AI Native (原生应用)</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-xl font-bold text-slate-800">{groupAiStats.native}</span>
+                            <span className="text-xs text-slate-400">{Math.round((groupAiStats.native/groupAiStats.total)*100)}%</span>
+                        </div>
+                    </div>
+                </div>
+                {/* Visual Decoration */}
+                <div className="absolute right-0 top-0 w-48 h-48 bg-violet-200/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+             </div>
 
             {/* Department Table */}
             <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -204,6 +267,14 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                       <td className="p-4 text-right"><span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs">91%</span></td>
                       <td className="p-4 text-xs text-slate-500">天问大模型, 效能工具</td>
                       <td className="p-4 text-right font-mono">28.0</td>
+                    </tr>
+                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('aibg')}>
+                      <td className="p-4 font-bold text-violet-600">AI 体系 (AI BG) <span className="text-[10px] text-white bg-red-500 px-1 rounded ml-1">New</span></td>
+                      <td className="p-4 text-right text-slate-600">600</td>
+                      <td className="p-4 text-right font-bold text-slate-800">600</td>
+                      <td className="p-4 text-right"><span className="text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">100%</span></td>
+                      <td className="p-4 text-xs text-slate-500">销售数字人, 具身智能</td>
+                      <td className="p-4 text-right font-mono">--</td>
                     </tr>
                   </tbody>
                 </table>
@@ -355,7 +426,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            <div className="flex flex-col h-full justify-center gap-4">
               <div className="flex justify-between items-end mb-1">
                  <div>
-                    <span className="text-2xl font-bold text-slate-800">2,450</span>
+                    <span className="text-2xl font-bold text-slate-800">3,050</span>
                     <span className="text-xs text-slate-500 ml-1">研发总人数 (HC)</span>
                  </div>
                  <div className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded">重心: 大安全体系</div>
@@ -365,34 +436,43 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
               <div className="w-full h-12 flex rounded-lg overflow-hidden border border-white shadow-sm cursor-pointer">
                  {/* Security */}
                  <div 
-                    className="h-full bg-indigo-600 w-[50%] flex items-center justify-center text-white text-xs font-bold relative group/h1 hover:opacity-90 transition-opacity" 
+                    className="h-full bg-indigo-600 w-[40%] flex items-center justify-center text-white text-xs font-bold relative group/h1 hover:opacity-90 transition-opacity" 
                     title="大安全体系"
                     onClick={(e) => { e.stopPropagation(); onSelectSystem && onSelectSystem('security'); }}
                  >
-                    大安全: 50%
+                    大安全: 40%
                  </div>
                  {/* Cloud */}
                  <div 
-                    className="h-full bg-blue-500 w-[30%] flex items-center justify-center text-white text-xs font-bold relative group/h2 hover:opacity-90 transition-opacity" 
+                    className="h-full bg-blue-500 w-[25%] flex items-center justify-center text-white text-xs font-bold relative group/h2 hover:opacity-90 transition-opacity" 
                     title="大云体系"
                     onClick={(e) => { e.stopPropagation(); onSelectSystem && onSelectSystem('cloud'); }}
                  >
-                    大云: 30%
+                    大云: 25%
                  </div>
                  {/* Platform */}
                  <div 
-                    className="h-full bg-emerald-500 w-[20%] flex items-center justify-center text-white text-xs font-bold relative group/h3 hover:opacity-90 transition-opacity" 
+                    className="h-full bg-emerald-500 w-[15%] flex items-center justify-center text-white text-xs font-bold relative group/h3 hover:opacity-90 transition-opacity" 
                     title="研发平台"
                     onClick={(e) => { e.stopPropagation(); onSelectSystem && onSelectSystem('platform'); }}
                  >
-                    平台: 20%
+                    平台: 15%
+                 </div>
+                  {/* AI BG */}
+                 <div 
+                    className="h-full bg-violet-500 w-[20%] flex items-center justify-center text-white text-xs font-bold relative group/h4 hover:opacity-90 transition-opacity" 
+                    title="AI 体系"
+                    onClick={(e) => { e.stopPropagation(); onSelectSystem && onSelectSystem('aibg'); }}
+                 >
+                    AI: 20%
                  </div>
               </div>
 
               <div className="flex justify-between text-xs text-slate-400">
                  <span className="flex items-center gap-1"><div className="w-2 h-2 bg-indigo-600 rounded-full"></div> 大安全</span>
                  <span className="flex items-center gap-1"><div className="w-2 h-2 bg-blue-500 rounded-full"></div> 大云</span>
-                 <span className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div> 研发平台</span>
+                 <span className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full"></div> 平台</span>
+                 <span className="flex items-center gap-1"><div className="w-2 h-2 bg-violet-500 rounded-full"></div> AI 体系</span>
               </div>
            </div>
         </DashboardWidget>

@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('portfolio-dashboard');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedSystem, setSelectedSystem] = useState<string>('security'); // 'security' | 'cloud' | 'platform'
+  const [selectedProductLine, setSelectedProductLine] = useState<{id: string, name: string} | null>(null);
 
   const handleSelectProject = (project: Project) => {
     setSelectedProject(project);
@@ -23,9 +24,8 @@ const App: React.FC = () => {
     setViewMode('system-dashboard');
   }
 
-  const handleSelectProductLine = () => {
-    // Logic to select a specific product line could pass an ID here
-    // For demo, we just switch view to the singular Product Dashboard
+  const handleSelectProductLine = (id: string, name: string) => {
+    setSelectedProductLine({ id, name });
     setViewMode('product-dashboard');
   };
 
@@ -48,6 +48,7 @@ const App: React.FC = () => {
       case 'security': return '大安全体系 (Big Security)';
       case 'cloud': return '大云体系 (Big Cloud)';
       case 'platform': return '研发平台体系 (R&D Platform)';
+      case 'aibg': return 'AI 体系 (AI BG)';
       default: return '体系仪表盘';
     }
   }
@@ -135,14 +136,14 @@ const App: React.FC = () => {
                     <span>/</span>
                     <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('system-dashboard')}>{getSystemName(selectedSystem)}</span>
                     <span>/</span>
-                    <span className="text-slate-800">产线仪表盘 (Product Line)</span>
+                    <span className="text-slate-800">{selectedProductLine ? selectedProductLine.name : '产线仪表盘'}</span>
                   </>
              )}
              {viewMode === 'project-detail' && (
                   <>
                      <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('system-dashboard')}>{getSystemName(selectedSystem)}</span>
                      <span>/</span>
-                     <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('product-dashboard')}>产线仪表盘</span>
+                     <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('product-dashboard')}>{selectedProductLine ? selectedProductLine.name : '产线仪表盘'}</span>
                      <span>/</span>
                      <span className="text-slate-800">项目执行视图</span>
                   </>
@@ -170,7 +171,10 @@ const App: React.FC = () => {
         {viewMode === 'system-map' && <SystemMap />}
         
         {viewMode === 'product-dashboard' && (
-          <ProductDashboard onSelectProject={handleSelectProject} />
+          <ProductDashboard 
+            onSelectProject={handleSelectProject} 
+            productLineName={selectedProductLine?.name}
+          />
         )}
 
         {viewMode === 'project-detail' && selectedProject && (

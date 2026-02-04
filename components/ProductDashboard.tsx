@@ -1,11 +1,107 @@
 import React, { useState } from 'react';
 import { PROJECTS_LIST } from '../constants';
-import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter } from 'lucide-react';
+import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter, BrainCircuit, Cpu, Sparkles } from 'lucide-react';
 import { Project } from '../types';
 
 interface ProductDashboardProps {
   onSelectProject: (project: Project) => void;
+  productLineName?: string;
 }
+
+// 1. Define Dynamic Data for different product lines
+const DASHBOARD_MOCK_DATA: Record<string, any> = {
+  'XDR': {
+    competitiveness: { rank: 'No.1', score: '4.9', voc: '92.5', nps: '+58', trend: '领先竞对', quadrant: '领跑者' },
+    cycle: { value: '8.5', trend: 'down', trendValue: '12%', unit: '月' },
+    roi: { ratio: '1:4.2', input: '50M', revenue: '210M' },
+    battlefield: { current: 1, total: 5, name: '实战攻防' },
+    quality: { closed: 12, total: 15, topN: '年度累计 TopN' },
+    version: { count: '2.0', reuse: '68%' },
+    manpower: { 
+      total: 350, 
+      growth: '65%',
+      aiStats: { total: 65, algo: 15, eng: 30, native: 20 }
+    }
+  },
+  'HCI': {
+    competitiveness: { rank: 'No.1', score: '4.7', voc: '91.0', nps: '+45', trend: '领先竞对', quadrant: '领跑者' },
+    cycle: { value: '6.5', trend: 'down', trendValue: '5%', unit: '月' },
+    roi: { ratio: '1:3.8', input: '80M', revenue: '304M' },
+    battlefield: { current: 2, total: 4, name: '企业级云化' },
+    quality: { closed: 8, total: 10, topN: '年度累计 TopN' },
+    version: { count: '3.0', reuse: '75%' },
+    manpower: { 
+      total: 350, 
+      growth: '40%',
+      aiStats: { total: 25, algo: 5, eng: 15, native: 5 }
+    }
+  },
+  '天问': {
+    competitiveness: { rank: 'No.2', score: '4.5', voc: '88.0', nps: '+30', trend: '追赶竞对', quadrant: '挑战者' },
+    cycle: { value: '3.0', trend: 'down', trendValue: '20%', unit: '月' },
+    roi: { ratio: '1:1.5', input: '120M', revenue: '180M' },
+    battlefield: { current: 3, total: 3, name: 'AI 效能' },
+    quality: { closed: 5, total: 8, topN: '年度累计 TopN' },
+    version: { count: '12.0', reuse: '40%' },
+    manpower: { 
+      total: 150, 
+      growth: '90%',
+      aiStats: { total: 120, algo: 60, eng: 40, native: 20 }
+    }
+  },
+  '托管云': {
+    competitiveness: { rank: 'No.3', score: '4.2', voc: '85.0', nps: '+25', trend: '追赶竞对', quadrant: '挑战者' },
+    cycle: { value: '4.5', trend: 'stable', trendValue: '0%', unit: '月' },
+    roi: { ratio: '1:2.8', input: '60M', revenue: '168M' },
+    battlefield: { current: 1, total: 2, name: '数据库上云' },
+    quality: { closed: 20, total: 25, topN: '年度累计 TopN' },
+    version: { count: '4.0', reuse: '55%' },
+    manpower: { 
+      total: 300, 
+      growth: '30%',
+      aiStats: { total: 30, algo: 5, eng: 20, native: 5 }
+    }
+  },
+  '数字人': {
+    competitiveness: { rank: 'No.1', score: '4.8', voc: '94.0', nps: '+62', trend: '领先竞对', quadrant: '领跑者' },
+    cycle: { value: '4.0', trend: 'down', trendValue: '15%', unit: '月' },
+    roi: { ratio: '1:5.5', input: '40M', revenue: '220M' },
+    battlefield: { current: 1, total: 2, name: '电商直播' },
+    quality: { closed: 18, total: 20, topN: '季度 TopN' },
+    version: { count: '6.0', reuse: '80%' },
+    manpower: { 
+      total: 350, 
+      growth: '80%',
+      aiStats: { total: 280, algo: 80, eng: 100, native: 100 }
+    }
+  },
+  '具身智能': {
+    competitiveness: { rank: 'No.2', score: '4.4', voc: '85.0', nps: '+35', trend: '追赶竞对', quadrant: '挑战者' },
+    cycle: { value: '12.0', trend: 'stable', trendValue: '0%', unit: '月' },
+    roi: { ratio: '1:0.5', input: '100M', revenue: '50M' }, // Low ROI, R&D heavy
+    battlefield: { current: 1, total: 1, name: '柔性制造' },
+    quality: { closed: 5, total: 8, topN: '年度 TopN' },
+    version: { count: '1.0', reuse: '45%' },
+    manpower: { 
+      total: 250, 
+      growth: '120%',
+      aiStats: { total: 200, algo: 120, eng: 60, native: 20 }
+    }
+  },
+  'DEFAULT': {
+    competitiveness: { rank: 'No.1', score: '4.6', voc: '90.0', nps: '+50', trend: '领先竞对', quadrant: '领跑者' },
+    cycle: { value: '7.0', trend: 'stable', trendValue: '0%', unit: '月' },
+    roi: { ratio: '1:3.0', input: '40M', revenue: '120M' },
+    battlefield: { current: 1, total: 3, name: '战略新市场' },
+    quality: { closed: 10, total: 12, topN: '年度累计 TopN' },
+    version: { count: '2.0', reuse: '60%' },
+    manpower: { 
+      total: 200, 
+      growth: '50%',
+      aiStats: { total: 40, algo: 10, eng: 20, native: 10 }
+    }
+  }
+};
 
 // Reusable Widget Container with Click Interaction
 const DashboardWidget: React.FC<{ 
@@ -71,15 +167,39 @@ const DrillDownModal: React.FC<{
         </div>
         
         <div className="p-3 border-t border-slate-100 text-xs text-slate-400 flex justify-end bg-slate-50 rounded-b-xl">
-           显示 1 - {React.Children.count(children) > 0 ? '10' : '0'} 条记录 (共 24 条)
+           显示 1 - {React.Children.count(children) > 0 ? '10' : '0'} 条记录
         </div>
       </div>
     </div>
   );
 };
 
-export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProject }) => {
+export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProject, productLineName = 'XDR 产品线' }) => {
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
+
+  // 2. Extract keyword and get dynamic data
+  const getFilterKeyword = (name: string) => {
+    if (name.includes('XDR')) return 'XDR';
+    if (name.includes('HCI')) return 'HCI';
+    if (name.includes('天问')) return '天问';
+    if (name.includes('托管云')) return '托管云';
+    if (name.includes('AC')) return 'AC';
+    if (name.includes('AF')) return 'AF';
+    if (name.includes('数字人')) return '数字人';
+    if (name.includes('具身智能')) return '具身智能';
+    return '';
+  };
+
+  const filterKeyword = getFilterKeyword(productLineName);
+  
+  // Get data for widgets, fallback to DEFAULT if not found
+  const data = DASHBOARD_MOCK_DATA[filterKeyword] || DASHBOARD_MOCK_DATA['DEFAULT'];
+
+  // Filter the projects
+  const filteredProjects = filterKeyword 
+    ? PROJECTS_LIST.filter(p => p.projectSet?.includes(filterKeyword))
+    : PROJECTS_LIST;
+
 
   // Helper to render table content based on drill-down type
   const renderDrillDownContent = () => {
@@ -90,7 +210,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
               <tr>
                 <th className="p-4">评估维度</th>
-                <th className="p-4">我司得分 (AICP)</th>
+                <th className="p-4">我司得分 ({productLineName.split(' ')[0]})</th>
                 <th className="p-4">主要竞对 (Competitor A)</th>
                 <th className="p-4">主要竞对 (Competitor B)</th>
                 <th className="p-4">差距分析</th>
@@ -100,7 +220,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             <tbody className="divide-y divide-slate-100">
               <tr>
                 <td className="p-4 font-medium">功能丰富度</td>
-                <td className="p-4 text-blue-600 font-bold">4.9</td>
+                <td className="p-4 text-blue-600 font-bold">{data.competitiveness.score}</td>
                 <td className="p-4">4.5</td>
                 <td className="p-4">4.2</td>
                 <td className="p-4"><span className="text-green-600 text-xs bg-green-50 px-2 py-1 rounded">+ 领先</span></td>
@@ -173,7 +293,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-               {PROJECTS_LIST.map(p => (
+               {filteredProjects.map(p => (
                  <tr key={p.id} className="hover:bg-slate-50">
                     <td className="p-4 font-medium text-blue-700">{p.name}</td>
                     <td className="p-4 text-xs text-slate-500">全新开发</td>
@@ -206,7 +326,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             </thead>
             <tbody className="divide-y divide-slate-100">
                <tr>
-                 <td className="p-4 font-medium">AICP 核心平台</td>
+                 <td className="p-4 font-medium">{productLineName} 核心平台</td>
                  <td className="p-4 text-right text-slate-600">¥ 25,000,000</td>
                  <td className="p-4 text-right text-slate-600">¥ 120,000,000</td>
                  <td className="p-4 text-right font-bold text-blue-700">1 : 4.8</td>
@@ -220,14 +340,6 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                  <td className="p-4 text-right font-bold text-slate-700">1 : 2.5</td>
                  <td className="p-4 text-right">55%</td>
                  <td className="p-4"><span className="text-amber-600 text-xs bg-amber-50 px-2 py-1 rounded">培育期</span></td>
-               </tr>
-                <tr>
-                 <td className="p-4 font-medium">中间件 SaaS</td>
-                 <td className="p-4 text-right text-slate-600">¥ 8,000,000</td>
-                 <td className="p-4 text-right text-slate-600">¥ 15,000,000</td>
-                 <td className="p-4 text-right font-bold text-slate-700">1 : 1.9</td>
-                 <td className="p-4 text-right">40%</td>
-                 <td className="p-4"><span className="text-slate-500 text-xs bg-slate-100 px-2 py-1 rounded">盈亏平衡</span></td>
                </tr>
             </tbody>
           </table>
@@ -247,7 +359,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             </thead>
             <tbody className="divide-y divide-slate-100">
                <tr>
-                 <td className="p-4 font-medium text-blue-700">金融核心交易云化</td>
+                 <td className="p-4 font-medium text-blue-700">{data.battlefield.name}</td>
                  <td className="p-4">陈亚历</td>
                  <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">Pilot 验证期</span></td>
                  <td className="p-4 text-slate-600">Top3 国有大行</td>
@@ -261,14 +373,6 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                  <td className="p-4 text-slate-600">智慧交通、智能制造</td>
                  <td className="p-4">¥ 15亿</td>
                  <td className="p-4 text-right">80%</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-medium text-slate-500">自动驾驶车路协同</td>
-                 <td className="p-4">吴杰茜</td>
-                 <td className="p-4"><span className="bg-slate-100 text-slate-500 px-2 py-1 rounded text-xs">技术预研</span></td>
-                 <td className="p-4 text-slate-600">--</td>
-                 <td className="p-4">¥ 50亿+</td>
-                 <td className="p-4 text-right">10%</td>
                </tr>
             </tbody>
           </table>
@@ -303,60 +407,112 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                  <td className="p-4">Beta 发布</td>
                  <td className="p-4"><span className="text-amber-600 text-xs">修复中 (预计 2天)</span></td>
                </tr>
-               <tr>
-                 <td className="p-4 font-mono text-slate-500">ISSUE-2024-912</td>
-                 <td className="p-4"><span className="text-amber-600 font-bold bg-amber-50 px-2 py-1 rounded text-xs">S2 严重</span></td>
-                 <td className="p-4">数据库连接池在断网后重连机制失效</td>
-                 <td className="p-4">现网 (SRE)</td>
-                 <td className="p-4">已上市</td>
-                 <td className="p-4"><span className="text-blue-600 text-xs">验证中</span></td>
-               </tr>
             </tbody>
           </table>
          );
       case 'manpower':
+         const aiStats = data.manpower.aiStats || { total: 0, algo: 0, eng: 0, native: 0 };
          return (
-           <table className="w-full text-left text-sm">
-             <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
-              <tr>
-                <th className="p-4">部门/团队</th>
-                <th className="p-4">投入方向</th>
-                <th className="p-4 text-right">人数 (HC)</th>
-                <th className="p-4 text-right">占比</th>
-                <th className="p-4">主要产出目标</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-               <tr>
-                 <td className="p-4 font-medium">平台架构部</td>
-                 <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs">技术平台</span></td>
-                 <td className="p-4 text-right font-mono">84</td>
-                 <td className="p-4 text-right font-mono">20%</td>
-                 <td className="p-4 text-slate-600">AICP 核心调度器稳定性、异构算力适配</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-medium">金融行业产品部</td>
-                 <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">战略增长</span></td>
-                 <td className="p-4 text-right font-mono">150</td>
-                 <td className="p-4 text-right font-mono">35%</td>
-                 <td className="p-4 text-slate-600">金融版特性开发、国产化数据库适配</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-medium">IoT 创新业务部</td>
-                 <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">战略增长</span></td>
-                 <td className="p-4 text-right font-mono">120</td>
-                 <td className="p-4 text-right font-mono">30%</td>
-                 <td className="p-4 text-slate-600">边缘网关 Gen5、端侧推理引擎</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-medium">维护与交付部</td>
-                 <td className="p-4"><span className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">存量维护</span></td>
-                 <td className="p-4 text-right font-mono">66</td>
-                 <td className="p-4 text-right font-mono">15%</td>
-                 <td className="p-4 text-slate-600">v1.x/v2.0 版本补丁、大客户定制交付</td>
-               </tr>
-            </tbody>
-          </table>
+           <div className="space-y-6">
+             {/* AI Talent Breakdown Section */}
+             <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100 rounded-xl p-5 relative overflow-hidden">
+                <div className="flex items-center gap-2 mb-4 relative z-10">
+                    <div className="p-1.5 bg-blue-100 rounded text-blue-600">
+                       <BrainCircuit className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-slate-800">AI 人才结构透视 (AI Talent Structure)</h4>
+                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold ml-2">
+                        渗透率 {Math.round((aiStats.total / data.manpower.total) * 100)}%
+                    </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+                    {/* Total AI */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-blue-100/50">
+                        <span className="text-xs text-slate-500 mb-1">AI 专职人才总数</span>
+                        <div className="flex items-baseline gap-2">
+                           <span className="text-2xl font-bold text-slate-800">{aiStats.total}</span>
+                           <span className="text-xs font-normal text-slate-400">人</span>
+                        </div>
+                    </div>
+                    
+                    {/* Algorithm Breakdown */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-indigo-100/50 hover:bg-white/80 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                            <BrainCircuit className="w-4 h-4 text-indigo-500" />
+                            <span className="text-xs font-bold text-slate-600">AI 算法 (Algorithm)</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-xl font-bold text-slate-800">{aiStats.algo}</span>
+                            <span className="text-xs text-slate-400">{aiStats.total > 0 ? Math.round((aiStats.algo/aiStats.total)*100) : 0}%</span>
+                        </div>
+                    </div>
+
+                    {/* Engineering Breakdown */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-cyan-100/50 hover:bg-white/80 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Cpu className="w-4 h-4 text-cyan-600" />
+                            <span className="text-xs font-bold text-slate-600">AI 工程 (Engineering)</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-xl font-bold text-slate-800">{aiStats.eng}</span>
+                            <span className="text-xs text-slate-400">{aiStats.total > 0 ? Math.round((aiStats.eng/aiStats.total)*100) : 0}%</span>
+                        </div>
+                    </div>
+
+                    {/* AI Native Breakdown */}
+                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-purple-100/50 hover:bg-white/80 transition-colors">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="w-4 h-4 text-purple-600" />
+                            <span className="text-xs font-bold text-slate-600">AI Native (原生应用)</span>
+                        </div>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-xl font-bold text-slate-800">{aiStats.native}</span>
+                            <span className="text-xs text-slate-400">{aiStats.total > 0 ? Math.round((aiStats.native/aiStats.total)*100) : 0}%</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Visual Decoration */}
+                <div className="absolute right-0 top-0 w-32 h-32 bg-blue-200/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+             </div>
+
+             {/* Existing Table */}
+             <table className="w-full text-left text-sm mt-4">
+               <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
+                <tr>
+                  <th className="p-4">部门/团队</th>
+                  <th className="p-4">投入方向</th>
+                  <th className="p-4 text-right">人数 (HC)</th>
+                  <th className="p-4 text-right">占比</th>
+                  <th className="p-4">主要产出目标</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                 <tr>
+                   <td className="p-4 font-medium">核心研发一部</td>
+                   <td className="p-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs">技术平台</span></td>
+                   <td className="p-4 text-right font-mono">{Math.floor(data.manpower.total * 0.2)}</td>
+                   <td className="p-4 text-right font-mono">20%</td>
+                   <td className="p-4 text-slate-600">稳定性、异构算力适配</td>
+                 </tr>
+                 <tr>
+                   <td className="p-4 font-medium">行业产品部</td>
+                   <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">战略增长</span></td>
+                   <td className="p-4 text-right font-mono">{Math.floor(data.manpower.total * 0.35)}</td>
+                   <td className="p-4 text-right font-mono">35%</td>
+                   <td className="p-4 text-slate-600">金融版特性开发</td>
+                 </tr>
+                 <tr>
+                   <td className="p-4 font-medium">AI 创新实验室</td>
+                   <td className="p-4"><span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">AI 赋能</span></td>
+                   <td className="p-4 text-right font-mono">{aiStats.total}</td>
+                   <td className="p-4 text-right font-mono">{Math.round((aiStats.total / data.manpower.total) * 100)}%</td>
+                   <td className="p-4 text-slate-600">Copilot 插件, 智能分析</td>
+                 </tr>
+              </tbody>
+            </table>
+           </div>
          );
        case 'version':
          return (
@@ -373,27 +529,19 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             </thead>
             <tbody className="divide-y divide-slate-100">
                <tr>
-                 <td className="p-4 font-medium text-blue-700">AICP v2.4.0</td>
+                 <td className="p-4 font-medium text-blue-700">v{data.version.count}</td>
                  <td className="p-4 text-xs">Major</td>
                  <td className="p-4 text-slate-600">2024-Q2 (Plan)</td>
-                 <td className="p-4 text-center font-bold text-blue-600">68%</td>
+                 <td className="p-4 text-center font-bold text-blue-600">{data.version.reuse}</td>
                  <td className="p-4">12</td>
                  <td className="p-4"><span className="bg-slate-100 text-slate-400 text-xs px-2 py-1 rounded">待发布</span></td>
                </tr>
                <tr>
-                 <td className="p-4 font-medium text-slate-700">AICP v2.3.0</td>
-                 <td className="p-4 text-xs">Minor</td>
+                 <td className="p-4 font-medium text-slate-700">v{parseInt(data.version.count)-1}.0</td>
+                 <td className="p-4 text-xs">Major</td>
                  <td className="p-4 text-slate-600">2023-12-20</td>
                  <td className="p-4 text-center font-bold text-slate-600">65%</td>
                  <td className="p-4">5</td>
-                 <td className="p-4"><span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded">热销中</span></td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-medium text-slate-700">IoT OS v5.0</td>
-                 <td className="p-4 text-xs">Major</td>
-                 <td className="p-4 text-slate-600">2023-10-15</td>
-                 <td className="p-4 text-center font-bold text-slate-600">60%</td>
-                 <td className="p-4">8</td>
                  <td className="p-4"><span className="bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded">热销中</span></td>
                </tr>
             </tbody>
@@ -411,12 +559,12 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
             <div className="w-1 h-5 bg-blue-600 rounded-full" />
-            <h2 className="text-lg font-bold text-slate-800">AICP 产品线 - 商业结果仪表盘</h2>
+            <h2 className="text-lg font-bold text-slate-800">{productLineName} - 商业结果仪表盘</h2>
         </div>
         <div className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">统计周期: 2024 YTD</div>
       </div>
 
-      {/* 8-Grid Dashboard Layout - All clickable now */}
+      {/* 8-Grid Dashboard Layout - Dynamic Widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 auto-rows-[220px]">
         
         {/* 1. 产品整体竞争力 */}
@@ -428,24 +576,24 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
            <div className="flex flex-col gap-4">
              <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-3xl font-bold text-slate-800">No.1</div>
+                  <div className="text-3xl font-bold text-slate-800">{data.competitiveness.rank}</div>
                   <div className="text-xs text-slate-500 mt-1">综合市场评价</div>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-semibold text-green-600 flex items-center gap-1 justify-end">
-                    <TrendingUp className="w-3 h-3" /> 领先竞对
+                    <TrendingUp className="w-3 h-3" /> {data.competitiveness.trend}
                   </div>
-                  <div className="text-xs text-slate-400">Gartner 象限</div>
+                  <div className="text-xs text-slate-400">Gartner {data.competitiveness.quadrant}</div>
                 </div>
              </div>
              <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2 group-hover:bg-blue-50/30 transition-colors">
                <div className="flex justify-between items-center text-sm">
                  <span className="text-slate-600">VOC 满意度评分</span>
-                 <span className="font-bold text-blue-700">92.5 <span className="text-[10px] text-slate-400 font-normal">/100</span></span>
+                 <span className="font-bold text-blue-700">{data.competitiveness.voc} <span className="text-[10px] text-slate-400 font-normal">/100</span></span>
                </div>
                <div className="flex justify-between items-center text-sm">
                  <span className="text-slate-600">NPS 净推荐值</span>
-                 <span className="font-bold text-blue-700">+58</span>
+                 <span className="font-bold text-blue-700">{data.competitiveness.nps}</span>
                </div>
              </div>
            </div>
@@ -481,14 +629,13 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
           onClick={() => setActiveDrillDown('cycle')}
         >
            <div className="flex items-baseline gap-2 mb-3">
-             <span className="text-3xl font-bold text-slate-800">8.5</span>
-             <span className="text-sm text-slate-500">月 (平均 TTM)</span>
-             <span className="ml-auto text-xs text-green-600 flex items-center bg-green-50 px-2 py-1 rounded-full">
-               <TrendingDown className="w-3 h-3 mr-1" /> 同比缩短 12%
+             <span className="text-3xl font-bold text-slate-800">{data.cycle.value}</span>
+             <span className="text-sm text-slate-500">{data.cycle.unit} (平均 TTM)</span>
+             <span className={`ml-auto text-xs ${data.cycle.trend === 'down' ? 'text-green-600 bg-green-50' : 'text-amber-600 bg-amber-50'} flex items-center px-2 py-1 rounded-full`}>
+               <TrendingDown className="w-3 h-3 mr-1" /> 同比缩短 {data.cycle.trendValue}
              </span>
            </div>
            <div className="flex-1 overflow-auto pointer-events-none">
-             {/* Note: In a real app we might allow clicking rows inside, but parent click handles drill down here */}
              <table className="w-full text-xs text-left">
                <thead className="text-slate-400 font-medium bg-slate-50 sticky top-0">
                  <tr>
@@ -499,24 +646,22 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                  </tr>
                </thead>
                <tbody className="divide-y divide-slate-100">
-                 <tr>
-                   <td className="p-2 font-medium">AICP 2.4 计算平台</td>
-                   <td className="p-2 text-slate-500">23Q4 - 24Q2</td>
-                   <td className="p-2 text-right font-mono">8.2</td>
-                   <td className="p-2 text-center"><span className="text-green-600 bg-green-50 px-1 rounded">达标</span></td>
-                 </tr>
-                 <tr>
-                   <td className="p-2 font-medium">IoT 网关 Gen5</td>
-                   <td className="p-2 text-slate-500">24Q1 - 24Q3</td>
-                   <td className="p-2 text-right font-mono">6.5</td>
-                   <td className="p-2 text-center"><span className="text-green-600 bg-green-50 px-1 rounded">优异</span></td>
-                 </tr>
-                 <tr>
-                   <td className="p-2 font-medium">云原生中间件 V2</td>
-                   <td className="p-2 text-slate-500">23Q3 - 24Q3</td>
-                   <td className="p-2 text-right font-mono text-red-500">11.0</td>
-                   <td className="p-2 text-center"><span className="text-red-600 bg-red-50 px-1 rounded">超期</span></td>
-                 </tr>
+                 {/* Only show relevant projects in mini table */}
+                 {filteredProjects.slice(0, 3).map(p => (
+                    <tr key={p.id}>
+                        <td className="p-2 font-medium">{p.name}</td>
+                        <td className="p-2 text-slate-500">23Q4 - 24Q2</td>
+                        <td className="p-2 text-right font-mono">{p.resultMetrics[2].value}</td>
+                        <td className="p-2 text-center">
+                            <span className={`text-${p.status === 'normal' ? 'green' : 'amber'}-600 bg-${p.status === 'normal' ? 'green' : 'amber'}-50 px-1 rounded`}>
+                                {p.status === 'normal' ? '达标' : '预警'}
+                            </span>
+                        </td>
+                    </tr>
+                 ))}
+                 {filteredProjects.length === 0 && (
+                     <tr><td colSpan={4} className="p-4 text-center text-slate-400">暂无项目</td></tr>
+                 )}
                </tbody>
              </table>
            </div>
@@ -534,13 +679,13 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                  <div className="absolute inset-0 rounded-full border-[12px] border-slate-100"></div>
                  <div className="absolute inset-0 rounded-full border-[12px] border-blue-500 border-l-transparent border-b-transparent rotate-45"></div>
                  <div className="text-center">
-                    <div className="text-3xl font-extrabold text-blue-900">1:4.2</div>
+                    <div className="text-3xl font-extrabold text-blue-900">{data.roi.ratio}</div>
                     <div className="text-[10px] text-slate-500 uppercase tracking-wide mt-1">投入产出比</div>
                  </div>
               </div>
               <div className="flex w-full justify-between px-4 mt-2 text-xs text-slate-500">
-                 <div>投入: ¥50M</div>
-                 <div>预估营收: ¥210M</div>
+                 <div>投入: ¥{data.roi.input}</div>
+                 <div>预估营收: ¥{data.roi.revenue}</div>
               </div>
            </div>
         </DashboardWidget>
@@ -556,7 +701,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
              <div className="flex-1">
                <div className="flex justify-between text-sm mb-1">
                  <span className="font-semibold text-slate-700">年度目标完成率</span>
-                 <span className="font-bold text-blue-600">1 / 5</span>
+                 <span className="font-bold text-blue-600">{data.battlefield.current} / {data.battlefield.total}</span>
                </div>
                <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                  <div className="h-full bg-blue-500 w-[20%] rounded-full"></div>
@@ -576,22 +721,16 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                </thead>
                <tbody className="divide-y divide-slate-100">
                  <tr>
-                   <td className="p-2 font-medium text-blue-800">金融核心交易云化</td>
-                   <td className="p-2">AICP 金融版</td>
+                   <td className="p-2 font-medium text-blue-800">{data.battlefield.name}</td>
+                   <td className="p-2">{productLineName.split(' ')[0]} 2.0</td>
                    <td className="p-2"><span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">Pilot验证</span></td>
-                   <td className="p-2 text-right">高 (Top3银行)</td>
+                   <td className="p-2 text-right">高</td>
                  </tr>
                  <tr>
                    <td className="p-2 font-medium text-slate-700">边缘计算节点</td>
                    <td className="p-2">IoT Gateway Gen5</td>
                    <td className="p-2"><span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">已上市</span></td>
                    <td className="p-2 text-right">中 (试用中)</td>
-                 </tr>
-                  <tr>
-                   <td className="p-2 font-medium text-slate-400">自动驾驶算力</td>
-                   <td className="p-2 text-slate-400">--</td>
-                   <td className="p-2"><span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">预研中</span></td>
-                   <td className="p-2 text-right">--</td>
                  </tr>
                </tbody>
              </table>
@@ -606,9 +745,9 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
         >
            <div className="flex flex-col h-full justify-between py-1">
              <div className="flex items-end gap-2">
-               <span className="text-4xl font-bold text-slate-800">12</span>
-               <span className="text-lg text-slate-400 mb-1">/ 15</span>
-               <span className="text-xs text-slate-500 mb-2 ml-auto">年度累计 TopN</span>
+               <span className="text-4xl font-bold text-slate-800">{data.quality.closed}</span>
+               <span className="text-lg text-slate-400 mb-1">/ {data.quality.total}</span>
+               <span className="text-xs text-slate-500 mb-2 ml-auto">{data.quality.topN}</span>
              </div>
              
              <div className="space-y-2 mt-2">
@@ -637,12 +776,12 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
            <div className="grid grid-cols-2 gap-2 h-full">
               <div className="bg-slate-50 rounded p-2 flex flex-col justify-center items-center text-center border border-slate-100 group-hover:bg-blue-50/20 transition-colors">
                  <div className="text-xs text-slate-500 mb-1">大版本/年</div>
-                 <div className="text-2xl font-bold text-slate-800">2.0</div>
+                 <div className="text-2xl font-bold text-slate-800">{data.version.count}</div>
                  <div className="text-[10px] text-green-600">达标</div>
               </div>
               <div className="bg-slate-50 rounded p-2 flex flex-col justify-center items-center text-center border border-slate-100 group-hover:bg-blue-50/20 transition-colors">
                  <div className="text-xs text-slate-500 mb-1">中台复用度</div>
-                 <div className="text-2xl font-bold text-blue-700">68%</div>
+                 <div className="text-2xl font-bold text-blue-700">{data.version.reuse}</div>
                  <div className="text-[10px] text-slate-400">目标: 70%</div>
               </div>
               <div className="col-span-2 mt-auto">
@@ -666,11 +805,11 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
           <div className="flex flex-col h-full justify-between">
              <div className="flex justify-between items-end mb-2">
                 <div>
-                   <div className="text-3xl font-bold text-slate-800">420<span className="text-sm font-normal text-slate-500 ml-1">人</span></div>
+                   <div className="text-3xl font-bold text-slate-800">{data.manpower.total}<span className="text-sm font-normal text-slate-500 ml-1">人</span></div>
                    <div className="text-xs text-slate-400">研发人员总数</div>
                 </div>
                 <div className="text-right">
-                   <div className="text-sm font-bold text-blue-600">65%</div>
+                   <div className="text-sm font-bold text-blue-600">{data.manpower.growth}</div>
                    <div className="text-[10px] text-slate-400">战略增长投入</div>
                 </div>
              </div>
@@ -679,7 +818,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
              <div className="flex h-12 w-full gap-1 mb-2">
                 <div className="bg-blue-600 h-full w-[65%] rounded-l-md p-2 text-white text-xs relative flex flex-col justify-center group-hover:bg-blue-700 transition-colors">
                    <span className="font-bold scale-90 origin-left">战略增长</span>
-                   <div className="absolute top-1 right-2 text-lg font-bold opacity-30">65%</div>
+                   <div className="absolute top-1 right-2 text-lg font-bold opacity-30">{data.manpower.growth}</div>
                 </div>
                 <div className="flex flex-col h-full w-[35%] gap-1">
                     <div className="bg-emerald-500 h-[60%] w-full rounded-tr-md px-2 text-white text-[10px] flex items-center justify-between group-hover:bg-emerald-600 transition-colors">
@@ -746,72 +885,80 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {PROJECTS_LIST.map((proj, idx) => (
-                <tr 
-                  key={proj.id} 
-                  className="hover:bg-slate-50 transition-colors cursor-pointer group"
-                  onClick={() => onSelectProject(proj)} 
-                >
-                  <td className="px-4 py-3 font-medium text-slate-800 border-r border-slate-100">{proj.projectSet}</td>
-                  <td className="px-4 py-3 font-medium text-blue-700 border-r border-slate-100">{proj.name}</td>
-                  <td className="px-4 py-3 text-slate-600 border-r border-slate-100">{proj.battlefield}</td>
-                  
-                  {/* Value/Quality */}
-                  <td className="px-4 py-3 border-r border-slate-100">
-                    <div className="flex flex-col gap-1">
-                       <div className="flex items-center justify-between">
-                         <span className="text-slate-400">价值:</span>
-                         <span className="font-bold text-slate-700">高</span>
-                       </div>
-                       <div className="flex items-center justify-between">
-                         <span className="text-slate-400">质量:</span>
-                         <span className={`font-bold ${proj.status === 'risk' ? 'text-red-500' : 'text-emerald-500'}`}>
-                           {proj.status === 'risk' ? '风险' : '稳定'}
-                         </span>
-                       </div>
-                    </div>
-                  </td>
-                  
-                  {/* Progress */}
-                  <td className="px-4 py-3 border-r border-slate-100">
-                     <div className="flex flex-col gap-1">
-                        <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden w-full">
-                          <div 
-                            className={`h-full rounded-full ${proj.status === 'risk' ? 'bg-red-500' : 'bg-emerald-500'}`} 
-                            style={{ width: `${proj.progress}%` }} 
-                          />
-                        </div>
-                        <div className="flex justify-between items-center text-[10px]">
-                           <span className="text-slate-400">{proj.progress}%</span>
-                           <span className={`px-1.5 rounded ${
-                             proj.status === 'normal' ? 'bg-green-100 text-green-700' : 
-                             proj.status === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                           }`}>
-                             {proj.status === 'normal' ? '正常' : proj.status === 'warning' ? '预警' : '风险'}
+              {filteredProjects.length > 0 ? (
+                filteredProjects.map((proj, idx) => (
+                  <tr 
+                    key={proj.id} 
+                    className="hover:bg-slate-50 transition-colors cursor-pointer group"
+                    onClick={() => onSelectProject(proj)} 
+                  >
+                    <td className="px-4 py-3 font-medium text-slate-800 border-r border-slate-100">{proj.projectSet}</td>
+                    <td className="px-4 py-3 font-medium text-blue-700 border-r border-slate-100">{proj.name}</td>
+                    <td className="px-4 py-3 text-slate-600 border-r border-slate-100">{proj.battlefield}</td>
+                    
+                    {/* Value/Quality */}
+                    <td className="px-4 py-3 border-r border-slate-100">
+                      <div className="flex flex-col gap-1">
+                         <div className="flex items-center justify-between">
+                           <span className="text-slate-400">价值:</span>
+                           <span className="font-bold text-slate-700">高</span>
+                         </div>
+                         <div className="flex items-center justify-between">
+                           <span className="text-slate-400">质量:</span>
+                           <span className={`font-bold ${proj.status === 'risk' ? 'text-red-500' : 'text-emerald-500'}`}>
+                             {proj.status === 'risk' ? '风险' : '稳定'}
                            </span>
-                        </div>
-                     </div>
-                  </td>
+                         </div>
+                      </div>
+                    </td>
+                    
+                    {/* Progress */}
+                    <td className="px-4 py-3 border-r border-slate-100">
+                       <div className="flex flex-col gap-1">
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden w-full">
+                            <div 
+                              className={`h-full rounded-full ${proj.status === 'risk' ? 'bg-red-500' : 'bg-emerald-500'}`} 
+                              style={{ width: `${proj.progress}%` }} 
+                            />
+                          </div>
+                          <div className="flex justify-between items-center text-[10px]">
+                             <span className="text-slate-400">{proj.progress}%</span>
+                             <span className={`px-1.5 rounded ${
+                               proj.status === 'normal' ? 'bg-green-100 text-green-700' : 
+                               proj.status === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                             }`}>
+                               {proj.status === 'normal' ? '正常' : proj.status === 'warning' ? '预警' : '风险'}
+                             </span>
+                          </div>
+                       </div>
+                    </td>
 
-                  {/* Manpower */}
-                  <td className="px-3 py-3 text-center border-r border-slate-100">{proj.headcount}</td>
-                  <td className="px-3 py-3 text-center border-r border-slate-100 text-slate-500">{proj.headcountPercentage}%</td>
+                    {/* Manpower */}
+                    <td className="px-3 py-3 text-center border-r border-slate-100">{proj.headcount}</td>
+                    <td className="px-3 py-3 text-center border-r border-slate-100 text-slate-500">{proj.headcountPercentage}%</td>
 
-                  {/* Operational Results */}
-                  {/* Using resultMetrics index 0,1,2,3 for simplicity based on mock data structure */}
-                  <td className="px-3 py-3 text-center border-r border-slate-100 font-mono font-medium">{proj.resultMetrics[0].value}</td>
-                  <td className="px-3 py-3 text-center border-r border-slate-100 font-mono text-red-600">{proj.resultMetrics[1].value}</td>
-                  <td className="px-3 py-3 text-center border-r border-slate-100 font-mono">{proj.resultMetrics[2].value}</td>
-                  <td className="px-3 py-3 text-center border-r border-slate-100 font-mono text-emerald-600">{proj.resultMetrics[3].value}</td>
-                  <td className={`px-3 py-3 text-center font-mono ${proj.manpowerDeviation?.startsWith('-') ? 'text-emerald-600' : 'text-amber-600'}`}>
-                    {proj.manpowerDeviation}
-                  </td>
+                    {/* Operational Results */}
+                    {/* Using resultMetrics index 0,1,2,3 for simplicity based on mock data structure */}
+                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono font-medium">{proj.resultMetrics[0].value}</td>
+                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono text-red-600">{proj.resultMetrics[1].value}</td>
+                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono">{proj.resultMetrics[2].value}</td>
+                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono text-emerald-600">{proj.resultMetrics[3].value}</td>
+                    <td className={`px-3 py-3 text-center font-mono ${proj.manpowerDeviation?.startsWith('-') ? 'text-emerald-600' : 'text-amber-600'}`}>
+                      {proj.manpowerDeviation}
+                    </td>
 
-                  <td className="px-4 py-3 text-right">
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors inline-block" />
-                  </td>
+                    <td className="px-4 py-3 text-right">
+                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 transition-colors inline-block" />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                   <td colSpan={13} className="p-8 text-center text-slate-400">
+                      该产线暂无相关项目数据
+                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
