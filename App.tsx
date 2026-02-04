@@ -4,47 +4,53 @@ import { ProductDashboard } from './components/ProductDashboard';
 import { ProjectDetail } from './components/ProjectDetail';
 import { SystemMap } from './components/SystemMap';
 import { PortfolioDashboard } from './components/PortfolioDashboard';
-import { BarChart3, Map, Layers, LayoutDashboard, PieChart } from 'lucide-react';
+import { SystemLevelDashboard } from './components/SystemLevelDashboard';
+import { BarChart3, Map, Layers, LayoutDashboard, PieChart, Network } from 'lucide-react';
 import { MOCK_PROJECT } from './constants';
 
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('portfolio-dashboard');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [selectedSystem, setSelectedSystem] = useState<string>('security'); // 'security' | 'cloud' | 'platform'
 
   const handleSelectProject = (project: Project) => {
     setSelectedProject(project);
     setViewMode('project-detail');
   };
 
-  const handleBackToDashboard = () => {
-    setSelectedProject(null);
-    setViewMode('portfolio-dashboard'); // Return to portfolio if that was the entry point, or simplify to handle history. For now, default back logic.
+  const handleSelectSystem = (systemId: string) => {
+    setSelectedSystem(systemId);
+    setViewMode('system-dashboard');
+  }
+
+  const handleSelectProductLine = () => {
+    // Logic to select a specific product line could pass an ID here
+    // For demo, we just switch view to the singular Product Dashboard
+    setViewMode('product-dashboard');
   };
 
-  // Improved back handler to determine where to go based on context could be added, 
-  // but for now simple toggle works. If entered from Portfolio, we might want to go back there.
-  // We can track 'previousView' if needed, but for simplicity:
   const handleBack = () => {
      setSelectedProject(null);
-     // Default back to product dashboard if strict hierarchy, 
-     // but if we support drilling from Portfolio, we might want to stay in 'project-detail' mode until closed?
-     // Actually, let's just go back to the view that makes sense. 
-     // Since the user can switch views via top nav, simple nulling is safest.
-     // To keep it simple: simpler logic -> if we are in project detail, we likely want to go back to the list we came from.
-     // For this specific requirement, simply exiting detail mode is enough, the tab remains active.
-     // However, setViewMode needs a target. 
-     // Let's assume we go back to Product Dashboard as standard, OR stay on Portfolio if we can.
-     // But wait, the tabs switch viewMode. 
-     // Let's just default to 'product-dashboard' for now as the 'list' view, 
-     // OR strictly speaking, if we clicked from Portfolio, we might want to return to Portfolio.
-     // For this demo, let's Default to 'product-dashboard' as it is the main list view, 
-     // or we can add a simple check.
+     // Smart back logic based on hierarchy
      if (viewMode === 'project-detail') {
-        // Ideally we return to previous, but let's default to product dashboard as it's the main "list"
         setViewMode('product-dashboard');
+     } else if (viewMode === 'product-dashboard') {
+        setViewMode('system-dashboard');
+     } else if (viewMode === 'system-dashboard') {
+        setViewMode('portfolio-dashboard');
+     } else {
+        setViewMode('portfolio-dashboard');
      }
   };
 
+  const getSystemName = (id: string) => {
+    switch(id) {
+      case 'security': return '大安全体系 (Big Security)';
+      case 'cloud': return '大云体系 (Big Cloud)';
+      case 'platform': return '研发平台体系 (R&D Platform)';
+      default: return '体系仪表盘';
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
@@ -61,36 +67,49 @@ const App: React.FC = () => {
             </h1>
           </div>
 
-          <nav className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+          <nav className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg overflow-x-auto">
              <button
               onClick={() => setViewMode('portfolio-dashboard')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap
                 ${viewMode === 'portfolio-dashboard' 
                   ? 'bg-white text-blue-600 shadow-sm' 
                   : 'text-slate-500 hover:text-slate-700'}`}
             >
               <PieChart className="w-4 h-4" />
-              集团组合概览
+              集团组合
             </button>
+            
+            {/* New System Layer */}
+            <button
+              onClick={() => setViewMode('system-dashboard')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap
+                ${viewMode === 'system-dashboard' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <Network className="w-4 h-4" />
+              体系仪表盘
+            </button>
+
             <button
               onClick={() => setViewMode('product-dashboard')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap
                 ${viewMode === 'product-dashboard' || viewMode === 'project-detail' 
                   ? 'bg-white text-blue-600 shadow-sm' 
                   : 'text-slate-500 hover:text-slate-700'}`}
             >
               <LayoutDashboard className="w-4 h-4" />
-              产品线仪表盘
+              产线仪表盘
             </button>
             <button
               onClick={() => setViewMode('system-map')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap
                 ${viewMode === 'system-map' 
                   ? 'bg-white text-blue-600 shadow-sm' 
                   : 'text-slate-500 hover:text-slate-700'}`}
             >
               <Map className="w-4 h-4" />
-              体系全景图
+              参考架构
             </button>
           </nav>
         </div>
@@ -101,16 +120,51 @@ const App: React.FC = () => {
         
         {/* Breadcrumb / Context Header */}
         <div className="mb-6">
-           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide">
-             {viewMode === 'portfolio-dashboard' ? '集团组合视图 (Portfolio Overview)' :
-              viewMode === 'system-map' ? '参考架构 (Reference Architecture)' : 
-              viewMode === 'project-detail' ? '执行视图 (Project Execution)' : '战略视图 (Strategic Product)'}
+           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-2">
+             {viewMode === 'portfolio-dashboard' && <span>集团组合视图 (Portfolio Overview)</span>}
+             {viewMode === 'system-dashboard' && (
+                 <>
+                    <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('portfolio-dashboard')}>集团</span>
+                    <span>/</span>
+                    <span className="text-slate-800">{getSystemName(selectedSystem)}</span>
+                 </>
+             )}
+             {viewMode === 'product-dashboard' && (
+                  <>
+                    <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('portfolio-dashboard')}>集团</span>
+                    <span>/</span>
+                    <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('system-dashboard')}>{getSystemName(selectedSystem)}</span>
+                    <span>/</span>
+                    <span className="text-slate-800">产线仪表盘 (Product Line)</span>
+                  </>
+             )}
+             {viewMode === 'project-detail' && (
+                  <>
+                     <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('system-dashboard')}>{getSystemName(selectedSystem)}</span>
+                     <span>/</span>
+                     <span className="cursor-pointer hover:text-blue-600" onClick={() => setViewMode('product-dashboard')}>产线仪表盘</span>
+                     <span>/</span>
+                     <span className="text-slate-800">项目执行视图</span>
+                  </>
+             )}
+             {viewMode === 'system-map' && <span>参考架构 (Reference Architecture)</span>}
            </h2>
         </div>
 
         {/* View Switcher */}
         {viewMode === 'portfolio-dashboard' && (
-          <PortfolioDashboard onSelectProject={handleSelectProject} />
+          <PortfolioDashboard 
+             onSelectProject={handleSelectProject} 
+             onSelectSystem={handleSelectSystem} 
+          />
+        )}
+
+        {viewMode === 'system-dashboard' && (
+          <SystemLevelDashboard 
+             systemId={selectedSystem}
+             onSelectSystem={handleSelectSystem}
+             onSelectProductLine={handleSelectProductLine} 
+          />
         )}
 
         {viewMode === 'system-map' && <SystemMap />}
