@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, PieChart, Layers, Target, Activity, ArrowRight, Wallet, Zap, BarChart, ChevronRight, X, Search, Filter, AlertTriangle, Globe, Users, ShieldAlert, Scale, BrainCircuit, Trophy, Star, ThumbsUp, Heart, Briefcase, LayoutGrid, AlertCircle, CheckCircle2, Flag, Timer, Gauge, BookOpen, Cpu, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Briefcase, LayoutGrid, Activity, ThumbsUp, Trophy, ArrowRight, ChevronRight, X, Search, Filter, CheckCircle2, AlertTriangle, AlertCircle, Flag, BrainCircuit, Cpu, Sparkles } from 'lucide-react';
 import { PROJECTS_LIST } from '../constants';
 import { Project } from '../types';
 
@@ -8,7 +8,7 @@ interface PortfolioDashboardProps {
   onSelectSystem?: (systemId: string) => void;
 }
 
-// Reusable Widget Container (Kept consistent with ProductDashboard style)
+// Reusable Widget Container
 const DashboardWidget: React.FC<{ 
   title: string; 
   icon?: React.ReactNode;
@@ -62,7 +62,7 @@ const PortfolioDrillDownModal: React.FC<{
               <input type="text" placeholder="按关键字搜索..." className="pl-8 pr-4 py-1 text-sm border border-slate-200 rounded-md focus:outline-none focus:border-indigo-400 w-64" />
            </div>
            <button className="flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded text-xs text-slate-600 hover:text-indigo-600">
-              <Filter className="w-3 h-3" /> 筛选年份: 2024
+              <Filter className="w-3 h-3" /> 筛选年份: 2025
            </button>
         </div>
 
@@ -78,13 +78,13 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
 
   const isHilltopProject = (project: Project) => {
-      // Mock logic: assign first two projects as "Hilltop" for demo
+      // Mock logic
       return project.id === 'PRJ-2024-001' || project.id === 'PRJ-2024-002';
   };
 
   const renderDrillDownContent = () => {
     switch (activeDrillDown) {
-       case 'active_projects':
+       case 'active_projects': {
          return (
            <table className="w-full text-left text-sm">
              <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
@@ -115,9 +115,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                         </div>
                      </td>
                      <td className="p-4 text-slate-600">{project.projectSet}</td>
-                     
                      <td className="p-4">
-                        {/* Mock Stage based on progress */}
                         {project.progress > 80 ? 
                             <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs">上市发布 (DCP5)</span> :
                          project.progress > 50 ? 
@@ -125,17 +123,14 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                             <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">开发 (TR4)</span>
                         }
                      </td>
-                     
                      <td className="p-4">
                         {project.status === 'normal' && <span className="flex items-center gap-1 text-green-600 font-bold"><CheckCircle2 className="w-4 h-4"/> 正常</span>}
                         {project.status === 'warning' && <span className="flex items-center gap-1 text-amber-600 font-bold"><AlertTriangle className="w-4 h-4"/> 预警</span>}
                         {project.status === 'risk' && <span className="flex items-center gap-1 text-red-600 font-bold"><AlertCircle className="w-4 h-4"/> 风险</span>}
                      </td>
-                     
                      <td className={`p-4 ${project.status === 'risk' ? 'text-red-500' : project.status === 'warning' ? 'text-amber-500' : 'text-slate-500'}`}>
                         {project.status === 'risk' ? '-15% (延期)' : project.status === 'warning' ? '-5%' : '0%'}
                      </td>
-                     
                      <td className="p-4 text-xs text-slate-500">
                         {project.progress > 80 ? 'TR6 验收' : 'TR5 评审'}
                      </td>
@@ -144,11 +139,11 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
              </tbody>
            </table>
          );
-       case 'manpower':
+       }
+       case 'manpower': {
          const groupAiStats = { total: 850, algo: 350, eng: 400, native: 100 };
          return (
           <div className="space-y-6 p-4">
-            {/* Summary Cards */}
             <div className="grid grid-cols-4 gap-4">
                <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
                   <div className="text-indigo-600 text-xs font-bold uppercase">总编制 (Headcount)</div>
@@ -168,7 +163,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                </div>
             </div>
 
-            {/* AI Talent Structure (Group Level) */}
              <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-xl p-5 relative overflow-hidden">
                 <div className="flex items-center gap-2 mb-4 relative z-10">
                     <div className="p-1.5 bg-violet-100 rounded text-violet-600">
@@ -181,7 +175,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
-                    {/* Total AI */}
                     <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-violet-100/50">
                         <span className="text-xs text-slate-500 mb-1">AI 专职人才总数</span>
                         <div className="flex items-baseline gap-2">
@@ -190,7 +183,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                         </div>
                     </div>
                     
-                    {/* Algorithm Breakdown */}
                     <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-indigo-100/50 hover:bg-white/80 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <BrainCircuit className="w-4 h-4 text-indigo-500" />
@@ -202,7 +194,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                         </div>
                     </div>
 
-                    {/* Engineering Breakdown */}
                     <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-cyan-100/50 hover:bg-white/80 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <Cpu className="w-4 h-4 text-cyan-600" />
@@ -214,7 +205,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                         </div>
                     </div>
 
-                    {/* AI Native Breakdown */}
                     <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-purple-100/50 hover:bg-white/80 transition-colors">
                         <div className="flex items-center gap-2 mb-2">
                             <Sparkles className="w-4 h-4 text-purple-600" />
@@ -226,11 +216,9 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                         </div>
                     </div>
                 </div>
-                {/* Visual Decoration */}
                 <div className="absolute right-0 top-0 w-48 h-48 bg-violet-200/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
              </div>
 
-            {/* Department Table */}
             <div className="border border-slate-200 rounded-lg overflow-hidden">
                 <table className="w-full text-left text-sm">
                    <thead className="bg-slate-50 text-slate-500 font-medium">
@@ -281,7 +269,8 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
             </div>
           </div>
          );
-       case 'cycle':
+       }
+       case 'cycle': {
          return (
             <table className="w-full text-left text-sm">
              <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
@@ -322,80 +311,143 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
              </tbody>
            </table>
          );
-       case 'competitiveness':
+       }
+       case 'competitiveness': {
+         // Detailed Competitiveness Matrix based on user data
+         const compData = [
+             { name: '大安全 - XDR', h2: '认可', h1: '认可', trend: '持平' },
+             { name: '大安全 - AC', h2: '一般', h1: '一般', trend: '提升' },
+             { name: '大安全 - AF', h2: '基本认可', h1: '基本认可', trend: '提升 (质量拉动)' },
+             { name: '大云 - HCI', h2: '认可', h1: '认可', trend: '持平' },
+             { name: '大云 - EDS', h2: '认可', h1: '认可', trend: '持平' },
+             { name: '大云 - MSP', h2: '基本认可', h1: '认可', trend: '下降' },
+             { name: '平台 - 天问AI', h2: '基本认可', h1: '基本认可', trend: '下降' },
+             { name: '平台 - DevOps', h2: '一般', h1: '一般', trend: '持平' },
+             { name: '平台 - 基础架构', h2: 'NA', h1: 'NA', trend: '/' },
+             { name: 'AI BG - 数字人', h2: 'NA', h1: 'NA', trend: '/' },
+             { name: 'AI BG - 机器人', h2: '基本认可', h1: '基本认可', trend: '提升' },
+             { name: '大云 - AD', h2: '基本认可', h1: '基本认可', trend: '下降' },
+             { name: '创新 - SSL VPN', h2: 'NA', h1: 'NA', trend: '/' },
+             { name: '创新 - 零信任', h2: '不认可', h1: '一般', trend: '下降' },
+             { name: '其它组件', h2: '不认可', h1: '不认可', trend: '下降' }
+         ];
+
          return (
-           <table className="w-full text-left text-sm">
-             <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
-               <tr>
-                 <th className="p-4">产线</th>
-                 <th className="p-4 text-right">竞争力评分 (1-5)</th>
-                 <th className="p-4">市场地位</th>
-                 <th className="p-4">最强竞对</th>
-                 <th className="p-4">主要差距/短板</th>
-               </tr>
-             </thead>
-             <tbody className="divide-y divide-slate-100">
-               <tr>
-                 <td className="p-4 font-bold text-indigo-700">XDR 产品线</td>
-                 <td className="p-4 text-right font-mono text-lg font-bold">4.9</td>
-                 <td className="p-4"><span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">领跑者 (Leader)</span></td>
-                 <td className="p-4">Competitor A (4.5)</td>
-                 <td className="p-4 text-xs text-slate-500">部分老旧探针兼容性</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-bold text-slate-700">HCI 产品线</td>
-                 <td className="p-4 text-right font-mono text-lg font-bold">4.7</td>
-                 <td className="p-4"><span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold">领跑者 (Leader)</span></td>
-                 <td className="p-4">Competitor C (4.6)</td>
-                 <td className="p-4 text-xs text-slate-500">数据库性能优化场景</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-bold text-slate-700">托管云</td>
-                 <td className="p-4 text-right font-mono text-lg font-bold text-amber-600">4.2</td>
-                 <td className="p-4"><span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold">挑战者 (Challenger)</span></td>
-                 <td className="p-4">Competitor B (4.8)</td>
-                 <td className="p-4 text-xs text-slate-500">品牌知名度，生态丰富度</td>
-               </tr>
-             </tbody>
-           </table>
+            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-100 text-slate-700 font-bold border-b-2 border-slate-300">
+                        <tr>
+                            <th className="p-3 border-r border-slate-200">产线 / 产品</th>
+                            <th className="p-3 text-center border-r border-slate-200">2025 H2 竞争力档位</th>
+                            <th className="p-3 text-center border-r border-slate-200 bg-slate-200/50">2025 H1 竞争力档位</th>
+                            <th className="p-3 text-center">竞争力趋势 2025H2VS2025H1</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {compData.map((row, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-3 font-medium text-slate-700 border-r border-slate-100">{row.name}</td>
+                                <td className="p-3 text-center border-r border-slate-100">
+                                    <span className={`px-3 py-1 rounded text-xs font-bold ${
+                                        row.h2 === '认可' ? 'bg-green-100 text-green-700' :
+                                        row.h2 === '基本认可' ? 'bg-blue-50 text-blue-700' :
+                                        row.h2 === '一般' ? 'bg-amber-50 text-amber-700' :
+                                        row.h2 === '不认可' ? 'bg-red-50 text-red-700' : 'bg-slate-100 text-slate-500'
+                                    }`}>
+                                        {row.h2}
+                                    </span>
+                                </td>
+                                <td className="p-3 text-center border-r border-slate-100 bg-slate-50/30">
+                                     <span className={`px-3 py-1 rounded text-xs font-medium ${
+                                        row.h1 === '认可' ? 'text-green-600' :
+                                        row.h1 === '基本认可' ? 'text-blue-600' :
+                                        row.h1 === '一般' ? 'text-amber-600' :
+                                        row.h1 === '不认可' ? 'text-red-600' : 'text-slate-400'
+                                    }`}>
+                                        {row.h1}
+                                    </span>
+                                </td>
+                                <td className={`p-3 text-center font-bold ${
+                                    row.trend.includes('提升') ? 'bg-[#92D050] text-slate-900' :
+                                    row.trend.includes('下降') ? 'bg-red-500 text-white' :
+                                    'text-slate-500'
+                                }`}>
+                                    {row.trend}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                 <div className="p-3 bg-yellow-50 text-xs text-yellow-700 border-t border-yellow-100 flex items-center gap-2">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>说明：竞争力档位分为 认可、基本认可、一般、不认可。趋势基于两期档位变化评估。</span>
+                </div>
+            </div>
          );
-       case 'satisfaction':
+       }
+       case 'satisfaction': {
+         const satData = [
+             { name: '大安全 - XDR', ext: 90.70, int: 89.42, total: 90.06, grade: '满意', rank: 1, trend: '持平' },
+             { name: '大安全 - AC', ext: 95.31, int: 83.92, total: 89.61, grade: '基本满意', rank: 2, trend: '持平' },
+             { name: '大安全 - AF', ext: 95.29, int: 81.88, total: 88.59, grade: '基本满意', rank: 3, trend: '持平' },
+             { name: '大云 - HCI', ext: 92.63, int: 82.27, total: 87.45, grade: '基本满意', rank: 4, trend: '持平' },
+             { name: '大云 - EDS', ext: 92.61, int: 82.28, total: 87.44, grade: '基本满意', rank: 5, trend: '持平' },
+             { name: '大云 - MSP', ext: 92.39, int: 79.72, total: 86.06, grade: '基本满意', rank: 6, trend: '持平' },
+             { name: '平台 - 天问AI', ext: 90.72, int: 80.51, total: 85.61, grade: '基本满意', rank: 7, trend: '持平' },
+             { name: '平台 - DevOps', ext: 89.00, int: 82.18, total: 85.59, grade: '基本满意', rank: 8, trend: '持平' },
+             { name: '平台 - 基础架构', ext: 86.78, int: 81.82, total: 84.30, grade: '满意一般', rank: 9, trend: '持平' },
+             { name: 'AI BG - 数字人', ext: 91.50, int: 76.21, total: 83.86, grade: '满意一般', rank: 10, trend: '持平' },
+             { name: 'AI BG - 机器人', ext: 83.90, int: 78.57, total: 81.24, grade: '满意一般', rank: 11, trend: '持平' },
+             { name: '大云 - AD', ext: 88.09, int: 74.00, total: 81.05, grade: '满意一般', rank: 12, trend: '持平' },
+             { name: '创新 - SSL VPN', ext: 90.77, int: 71.15, total: 80.96, grade: '满意一般', rank: 13, trend: '持平' },
+             { name: '创新 - 零信任', ext: 92.00, int: 68.42, total: 80.21, grade: '满意一般', rank: 14, trend: '持平' },
+             { name: '其它组件', ext: 92.12, int: 68.07, total: 80.10, grade: '满意一般', rank: 15, trend: '提升' }
+         ];
+
          return (
-           <table className="w-full text-left text-sm">
-             <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
-               <tr>
-                 <th className="p-4">产线</th>
-                 <th className="p-4 text-right">VOC 满意度 (100)</th>
-                 <th className="p-4 text-right">NPS 净推荐值</th>
-                 <th className="p-4">主要好评</th>
-                 <th className="p-4">主要槽点 (Top Complaint)</th>
-               </tr>
-             </thead>
-             <tbody className="divide-y divide-slate-100">
-               <tr>
-                 <td className="p-4 font-bold text-indigo-700">AC 产品线</td>
-                 <td className="p-4 text-right font-mono font-bold text-green-600">95%</td>
-                 <td className="p-4 text-right font-mono font-bold text-green-600">+60</td>
-                 <td className="p-4 text-xs text-slate-500">管控精准，识别率高</td>
-                 <td className="p-4 text-xs text-slate-500">界面配置复杂</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-bold text-slate-700">HCI 产品线</td>
-                 <td className="p-4 text-right font-mono font-bold text-emerald-600">92%</td>
-                 <td className="p-4 text-right font-mono font-bold text-emerald-600">+45</td>
-                 <td className="p-4 text-xs text-slate-500">稳定可靠，运维简单</td>
-                 <td className="p-4 text-xs text-slate-500">扩容价格偏高</td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-bold text-slate-700">风云 AI</td>
-                 <td className="p-4 text-right font-mono font-bold text-amber-600">85%</td>
-                 <td className="p-4 text-right font-mono font-bold text-amber-600">+20</td>
-                 <td className="p-4 text-xs text-slate-500">创新能力强</td>
-                 <td className="p-4 text-xs text-slate-500">幻觉问题，落地场景少</td>
-               </tr>
-             </tbody>
-           </table>
+            <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-100 text-slate-700 font-bold border-b-2 border-slate-300">
+                        <tr>
+                            <th className="p-3 border-r border-slate-200">产线 / 部门</th>
+                            <th className="p-3 text-right border-r border-slate-200">外部满意度</th>
+                            <th className="p-3 text-right border-r border-slate-200">内部满意度</th>
+                            <th className="p-3 text-right border-r border-slate-200 bg-slate-200">整体满意度</th>
+                            <th className="p-3 text-center border-r border-slate-200">档位</th>
+                            <th className="p-3 text-center border-r border-slate-200">排名</th>
+                            <th className="p-3 text-center">满意度趋势 (VS H1)</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {satData.map((row, idx) => (
+                            <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                <td className="p-3 font-medium text-slate-700 border-r border-slate-100">{row.name}</td>
+                                <td className="p-3 text-right font-mono text-slate-600 border-r border-slate-100">{row.ext.toFixed(2)}</td>
+                                <td className="p-3 text-right font-mono text-slate-600 border-r border-slate-100">{row.int.toFixed(2)}</td>
+                                <td className="p-3 text-right font-mono font-bold text-slate-800 border-r border-slate-100 bg-slate-50">{row.total.toFixed(2)}</td>
+                                <td className="p-3 text-center border-r border-slate-100">
+                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                        row.grade === '满意' ? 'text-green-700 bg-green-50' :
+                                        row.grade === '基本满意' ? 'text-blue-700 bg-blue-50' : 'text-slate-600 bg-slate-100'
+                                    }`}>
+                                        {row.grade}
+                                    </span>
+                                </td>
+                                <td className="p-3 text-center font-mono border-r border-slate-100">{row.rank}</td>
+                                <td className={`p-3 text-center font-medium ${row.trend === '提升' ? 'bg-[#92D050] text-black' : 'text-slate-500'}`}>
+                                    {row.trend}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                <div className="p-3 bg-yellow-50 text-xs text-yellow-700 border-t border-yellow-100 flex items-center gap-2">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>说明：整体满意度 = (外部满意度 + 内部满意度) / 2。档位划分：&gt;90为满意，85-90为基本满意，&lt;85为满意一般。</span>
+                </div>
+            </div>
          );
+       }
       default:
         return <div className="p-8 text-center text-slate-500">暂无数据</div>;
     }
@@ -403,7 +455,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-       
+      
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -416,7 +468,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
       {/* 8-Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 auto-rows-[220px]">
         
-        {/* 1. 人力资源投入 (Manpower) [ROW 1, LEFT] */}
+        {/* 1. Manpower Investment */}
         <DashboardWidget 
           title="人力投入分布 (Manpower)" 
           icon={<Briefcase className="w-4 h-4" />}
@@ -477,7 +529,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            </div>
         </DashboardWidget>
 
-        {/* 2. 在研项目总览 (Active Projects) [ROW 1, RIGHT - NEW] */}
+        {/* 2. Active Projects */}
         <DashboardWidget
            title="在研项目总览 (Active Projects)"
            icon={<LayoutGrid className="w-4 h-4" />}
@@ -485,7 +537,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            onClick={() => setActiveDrillDown('active_projects')}
         >
            <div className="flex items-center justify-between h-full px-2">
-              {/* Left: Stats & Health */}
               <div className="flex flex-col justify-center gap-3 border-r border-slate-100 pr-6">
                  <div>
                     <div className="text-3xl font-bold text-slate-800">142</div>
@@ -507,7 +558,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                  </div>
               </div>
 
-              {/* Right: Key Milestones */}
               <div className="flex-1 pl-6">
                  <div className="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">近期重点里程碑</div>
                  <div className="space-y-3">
@@ -533,7 +583,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            </div>
         </DashboardWidget>
 
-        {/* 3. 研发效率 (Efficiency) [ROW 2, LEFT] */}
+        {/* 3. Efficiency */}
         <DashboardWidget 
           title="研发效率 (Efficiency)" 
           icon={<Activity className="w-4 h-4" />}
@@ -554,7 +604,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            </div>
         </DashboardWidget>
 
-        {/* 4. Customer Satisfaction [ROW 2, MID] */}
+        {/* 4. Satisfaction */}
         <DashboardWidget
            title="客户满意度 (Satisfaction)"
            icon={<ThumbsUp className="w-4 h-4" />}
@@ -566,7 +616,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                  <span className="text-2xl font-bold text-emerald-600">92%</span>
               </div>
               
-              {/* Trend Visualization */}
               <div className="flex items-end justify-between h-12 gap-1 mb-2">
                  {[60, 70, 65, 80, 92].map((h, i) => (
                     <div key={i} className={`w-full bg-emerald-${200 + i*100} rounded-t-sm`} style={{ height: `${h}%` }}></div>
@@ -585,7 +634,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            </div>
         </DashboardWidget>
 
-        {/* 5. Product Competitiveness [ROW 2, RIGHT - 2 Cols] */}
+        {/* 5. Competitiveness */}
         <DashboardWidget
            title="产品竞争力 (Competitiveness)"
            icon={<Trophy className="w-4 h-4" />}
@@ -593,7 +642,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
            onClick={() => setActiveDrillDown('competitiveness')}
         >
            <div className="grid grid-cols-2 gap-4 h-full items-center">
-              {/* Left: Score */}
               <div className="flex flex-col justify-center border-r border-slate-100 pr-4">
                  <div className="flex justify-between items-end mb-3">
                     <span className="text-xs text-slate-500">综合评分</span>
@@ -607,7 +655,6 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                  </div>
               </div>
               
-              {/* Right: Breakdown */}
               <div className="space-y-3 pl-2">
                  <div className="flex justify-between items-center text-xs border-b border-slate-50 pb-2">
                     <span className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-indigo-500"></span> 领跑者</span>

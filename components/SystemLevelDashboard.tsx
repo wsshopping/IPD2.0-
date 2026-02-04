@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, List, ChevronDown, RefreshCw } from 'lucide-react';
+import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, ArrowLeft, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, List, ChevronDown, RefreshCw, Sparkles, Workflow, Bot, Terminal, TrendingDown, Calendar } from 'lucide-react';
 
 interface SystemLevelDashboardProps {
   onSelectProductLine: (id: string, name: string) => void;
@@ -88,7 +88,7 @@ const SystemDrillDownModal: React.FC<{
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
-             <div className="w-1 h-5 bg-indigo-600 rounded-full" />
+             <div className={`w-1 h-5 rounded-full ${title.includes('AI') ? 'bg-violet-600' : 'bg-indigo-600'}`} />
              <h3 className="text-lg font-bold text-slate-800">{title}</h3>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
@@ -96,8 +96,8 @@ const SystemDrillDownModal: React.FC<{
           </button>
         </div>
         
-        {/* Only show default toolbar if NOT in quality view (quality has its own custom filter bar) */}
-        {!title.includes('质量') && (
+        {/* Only show default toolbar if NOT in quality view (quality has its own custom filter bar) and NOT in AI view */}
+        {!title.includes('质量') && !title.includes('AI Native') && (
             <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex gap-2">
             <div className="relative">
                 <Search className="w-4 h-4 absolute left-2 top-2 text-slate-400" />
@@ -122,6 +122,7 @@ const SystemDrillDownModal: React.FC<{
 
 export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSelectProductLine, systemId = 'security', onSelectSystem }) => {
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
+  const [aiProjectDetail, setAiProjectDetail] = useState<string | null>(null);
 
   // --- Quality Filter State ---
   const [qualityFilters, setQualityFilters] = useState({
@@ -212,7 +213,427 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
 
   const renderDrillDownContent = () => {
       switch (activeDrillDown) {
-          case 'active_projects':
+          case 'ai_native': {
+            // SUB-VIEW: Detailed Phase Comparison
+            if (aiProjectDetail) {
+                // Mock Phase Data for illustration based on the selected project
+                // Added date ranges for better context
+                const phaseData = [
+                    { 
+                        name: '需求梳理', 
+                        baseline: 15, 
+                        current: 12, 
+                        reduction: '20%', 
+                        color: 'bg-slate-500',
+                        dates: { original: '24/01/01-01/15', native: '24/01/01-01/12' }
+                    },
+                    { 
+                        name: '设计阶段', 
+                        baseline: 20, 
+                        current: 15, 
+                        reduction: '25%', 
+                        color: 'bg-blue-500',
+                        dates: { original: '24/01/16-02/04', native: '24/01/13-01/27' }
+                    },
+                    { 
+                        name: '编码自测', 
+                        baseline: 45, 
+                        current: 20, 
+                        reduction: '55%', 
+                        color: 'bg-violet-600', // Highlight: Coding has biggest drop
+                        dates: { original: '24/02/05-03/20', native: '24/01/28-02/16' }
+                    },
+                    { 
+                        name: '联调BVT', 
+                        baseline: 10, 
+                        current: 8, 
+                        reduction: '20%', 
+                        color: 'bg-indigo-500',
+                        dates: { original: '24/03/21-03/30', native: '24/02/17-02/24' }
+                    },
+                    { 
+                        name: '集成阶段', 
+                        baseline: 10, 
+                        current: 8, 
+                        reduction: '20%', 
+                        color: 'bg-indigo-500',
+                        dates: { original: '24/03/31-04/09', native: '24/02/25-03/03' }
+                    },
+                    { 
+                        name: '系统测试', 
+                        baseline: 20, 
+                        current: 12, 
+                        reduction: '40%', 
+                        color: 'bg-emerald-500',
+                        dates: { original: '24/04/10-04/29', native: '24/03/04-03/15' }
+                    },
+                ];
+
+                const maxBaseline = Math.max(...phaseData.map(p => p.baseline));
+
+                return (
+                    <div className="space-y-6 animate-in slide-in-from-right duration-300">
+                        {/* Header with Back Button */}
+                        <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+                            <button 
+                                onClick={() => setAiProjectDetail(null)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors group"
+                            >
+                                <ArrowLeft className="w-5 h-5 text-slate-500 group-hover:text-blue-600" />
+                            </button>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800">{aiProjectDetail}</h3>
+                                <div className="text-sm text-slate-500 flex items-center gap-2">
+                                    <span>AI Native 模式分阶段效能对比</span>
+                                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                    <span className="text-violet-600 font-medium">编码阶段提效显著</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Chart Area */}
+                        <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                            <div className="flex justify-between items-center mb-6 text-sm text-slate-500">
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-violet-600 rounded"></div>
+                                        <span>AI实战耗时</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-emerald-100 rounded border border-dashed border-emerald-300"></div>
+                                        <span>AI节省时间</span>
+                                    </div>
+                                </div>
+                                <div className="text-xs bg-slate-200 px-2 py-1 rounded">Reference: Original Baseline</div>
+                            </div>
+
+                            <div className="space-y-8">
+                                {phaseData.map((phase, idx) => {
+                                    const saved = phase.baseline - phase.current;
+                                    const widthPercent = (phase.baseline / maxBaseline) * 100;
+                                    
+                                    return (
+                                    <div key={idx} className="relative">
+                                        <div className="flex justify-between text-sm font-bold text-slate-700 mb-2">
+                                            <span>{phase.name}</span>
+                                            <span className="text-slate-400 text-xs font-normal">原计划基线: {phase.baseline}天</span>
+                                        </div>
+                                        
+                                        {/* Main Comparison Bar */}
+                                        <div className="relative h-10 w-full bg-slate-200/50 rounded-lg overflow-hidden flex shadow-inner" style={{ width: `${widthPercent}%`, minWidth: '200px' }}>
+                                            
+                                            {/* 1. Actual AI Time (Solid) */}
+                                            <div 
+                                                className={`h-full ${phase.color} flex items-center justify-end px-3 text-white font-bold text-sm shadow-md z-10 transition-all duration-700`}
+                                                style={{ width: `${(phase.current / phase.baseline) * 100}%` }}
+                                            >
+                                                {phase.current}天
+                                            </div>
+
+                                            {/* 2. Saved Time (Striped/Highlighted) */}
+                                            <div 
+                                                className="h-full bg-emerald-100 flex items-center justify-center relative overflow-hidden flex-1 border-l border-white/20"
+                                            >
+                                                 {/* Striped Pattern */}
+                                                 <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(45deg, #059669 25%, transparent 25%, transparent 50%, #059669 50%, #059669 75%, transparent 75%, transparent)', backgroundSize: '10px 10px' }}></div>
+                                                 
+                                                 <div className="flex items-center gap-1 text-emerald-700 font-bold text-xs z-10 px-2 whitespace-nowrap">
+                                                    <TrendingDown className="w-3 h-3" /> 省 {saved}天
+                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Date Details */}
+                                        <div className="flex justify-start gap-6 text-[10px] font-mono mt-1.5 text-slate-500">
+                                            <div className="flex items-center gap-1">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                                                <span>Original: {phase.dates.original}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1 text-violet-700 font-medium">
+                                                <span className="w-1.5 h-1.5 rounded-full bg-violet-600"></span>
+                                                <span>Actual: {phase.dates.native}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )})}
+                            </div>
+                        </div>
+
+                        {/* Insight Box */}
+                        <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-4 flex gap-3">
+                            <Sparkles className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                                <h5 className="font-bold text-indigo-900 text-sm">效能洞察</h5>
+                                <p className="text-xs text-indigo-700 mt-1 leading-relaxed">
+                                    通过引入 <strong>Code-Copilot</strong> 和 <strong>Auto-Unit-Test</strong> 生成工具，<span className="font-bold">编码自测</span>阶段耗时缩短了 55% (节省25天)。
+                                    同时，AI 辅助生成测试用例使<span className="font-bold">系统测试</span>阶段覆盖率提升，回归测试周期缩短 40% (节省8天)。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="space-y-6">
+                    {/* Layer 1: System Overview */}
+                    <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                        {/* Decorative background elements */}
+                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl"></div>
+                        
+                        <div className="relative z-10 grid grid-cols-4 gap-8">
+                            {/* Metric 1 */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-indigo-100 text-sm font-medium">全员 AI 渗透率 (Adoption)</span>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-4xl font-bold">78%</span>
+                                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded text-white flex items-center gap-1">
+                                        <TrendingUp className="w-3 h-3" /> +12%
+                                    </span>
+                                </div>
+                                <div className="w-full bg-black/20 h-1.5 rounded-full mt-2">
+                                    <div className="bg-white h-full rounded-full" style={{width: '78%'}}></div>
+                                </div>
+                            </div>
+
+                            {/* Metric 2 */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-indigo-100 text-sm font-medium">平均硅含量 (Silicon Content)</span>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-4xl font-bold">42%</span>
+                                    <span className="text-sm text-indigo-200">/ 目标 50%</span>
+                                </div>
+                                <div className="w-full bg-black/20 h-1.5 rounded-full mt-2">
+                                    <div className="bg-emerald-400 h-full rounded-full" style={{width: '42%'}}></div>
+                                </div>
+                            </div>
+
+                            {/* Metric 3 */}
+                            <div className="flex flex-col gap-1">
+                                <span className="text-indigo-100 text-sm font-medium">累计节省工时 (Hours Saved)</span>
+                                <div className="flex items-baseline gap-2">
+                                    <span className="text-4xl font-bold">12,450</span>
+                                    <span className="text-sm text-indigo-200">h</span>
+                                </div>
+                                <div className="text-xs text-indigo-200 mt-1 flex items-center gap-1">
+                                    <Users className="w-3 h-3" /> 相当于节省 75 人/月
+                                </div>
+                            </div>
+
+                            {/* Metric 4 - Quality Impact */}
+                            <div className="flex flex-col gap-1 border-l border-white/10 pl-8">
+                                <span className="text-indigo-100 text-sm font-medium">AI 代码采纳率</span>
+                                <div className="text-3xl font-bold">35%</div>
+                                <span className="text-indigo-100 text-sm font-medium mt-2">AI 生成代码 Bug 率</span>
+                                <div className="text-xl font-bold text-emerald-300">0.05 <span className="text-xs font-normal text-indigo-200">/千行</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Layer 2: Project/Version Evolution Table */}
+                    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h4 className="font-bold text-slate-700 text-sm">产线 AI 模式演进 (Evolution per Product Line)</h4>
+                            <div className="flex items-center gap-4 text-xs text-slate-500">
+                                {/* Removed Baseline Legend */}
+                                <div className="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                                    <div className="w-2 h-2 rounded-full bg-blue-500"></div> 
+                                    <span className="font-bold text-blue-700">B类: 自研 CoStrict</span>
+                                </div>
+                                <div className="flex items-center gap-1 bg-violet-50 px-2 py-1 rounded border border-violet-100">
+                                    <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                                    <span className="font-bold text-violet-700">A类: 业界顶尖模型</span>
+                                </div>
+                            </div>
+                        </div>
+                        <table className="w-full text-sm text-left">
+                            <thead className="bg-slate-50 text-slate-500 font-medium">
+                                <tr>
+                                    <th className="p-4 w-64">产线 / 项目版本</th>
+                                    <th className="p-4 w-48">产线模式 (Strategy)</th>
+                                    <th className="p-4 w-80">项目周期对比 (Original vs AI)</th>
+                                    <th className="p-4 w-48">硅含量 (Silicon)</th>
+                                    <th className="p-4 text-center">用例通过率</th>
+                                    <th className="p-4">自动化 (Gen/Exec)</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {currentSystemData.lines.map((line, lineIdx) => {
+                                    // 1. Determine Mode for this entire Product Line based on ID/Logic
+                                    // Complex/Innovation lines -> Class A
+                                    // Performance/Legacy lines -> Class B
+                                    const isClassA = ['xdr', 'ai-sec', 'fengyun', 'tianwen', 'digital-human', 'embodied-ai', 'managed-cloud'].includes(line.id);
+                                    
+                                    const modeLabel = isClassA ? 'A类 (顶尖模型)' : 'B类 (自研CoStrict)';
+                                    const modeColor = isClassA ? 'violet' : 'blue';
+                                    const ModeIcon = isClassA ? Sparkles : Terminal;
+
+                                    // Generate evolutionary projects for this specific mode
+                                    // REMOVED 'baseline' stage from list
+                                    const projects = [
+                                        { 
+                                            name: `${line.name.split(' ')[0]} v4.0`, 
+                                            type: 'native',
+                                            baselineDays: 120, 
+                                            actualDays: isClassA ? 90 : 108, 
+                                            silicon: isClassA ? 35 : 20,
+                                            passRate: 90,
+                                            autoGen: 1200,
+                                            autoExec: 2500,
+                                            startDate: '2024-01-15',
+                                            originalEndDate: '2024-05-15',
+                                            actualEndDate: isClassA ? '2024-04-15' : '2024-05-03'
+                                        },
+                                        { 
+                                            name: `${line.name.split(' ')[0]} v5.0`, 
+                                            type: 'native',
+                                            baselineDays: 120, 
+                                            actualDays: isClassA ? 75 : 88, 
+                                            silicon: isClassA ? 65 : 45,
+                                            passRate: 98,
+                                            autoGen: 4500,
+                                            autoExec: 5200,
+                                            startDate: '2024-06-01',
+                                            originalEndDate: '2024-10-01',
+                                            actualEndDate: isClassA ? '2024-08-15' : '2024-08-28'
+                                        }
+                                    ];
+
+                                    return (
+                                        <React.Fragment key={lineIdx}>
+                                            {/* Product Line Header Row - Shows the assigned Mode */}
+                                            <tr className="bg-slate-50/80 border-t border-slate-200">
+                                                <td colSpan={6} className="p-3 pl-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
+                                                            <Layers className="w-3 h-3 text-slate-400" />
+                                                            {line.name}
+                                                        </span>
+                                                        <span className={`text-[10px] px-2 py-0.5 rounded border flex items-center gap-1 font-bold ${isClassA ? 'bg-violet-50 text-violet-700 border-violet-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                                                            <ModeIcon className="w-3 h-3" />
+                                                            当前模式: {modeLabel}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            
+                                            {/* Project Rows */}
+                                            {projects.map((proj, pIdx) => {
+                                                const efficiency = Math.round(((proj.baselineDays - proj.actualDays) / proj.baselineDays) * 100);
+                                                
+                                                return (
+                                                    <tr key={`${lineIdx}-${pIdx}`} className={`hover:bg-slate-50 transition-colors ${isClassA ? 'bg-violet-50/10' : 'bg-blue-50/10'}`}>
+                                                        <td className="p-4 pl-8">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`w-1.5 h-1.5 rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'} animate-pulse`}></div>
+                                                                <span className={`font-medium ${isClassA ? 'text-violet-700 font-bold' : 'text-blue-700 font-bold'}`}>
+                                                                    {proj.name}
+                                                                </span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-4">
+                                                            <span className={`text-xs px-2 py-0.5 rounded font-bold ${isClassA ? 'text-violet-700 bg-violet-100' : 'text-blue-700 bg-blue-100'}`}>Native (原生)</span>
+                                                        </td>
+                                                        
+                                                        {/* E2E Efficiency with Dual Comparison - CLICKABLE */}
+                                                        <td 
+                                                            className="p-4 cursor-pointer group/cell relative"
+                                                            onClick={() => setAiProjectDetail(proj.name)}
+                                                        >
+                                                            <div className="absolute inset-0 bg-indigo-50 opacity-0 group-hover/cell:opacity-20 transition-opacity"></div>
+                                                            <div className="flex flex-col gap-2 min-w-[220px] relative z-10">
+                                                                
+                                                                {/* NEW: Date Info Header */}
+                                                                <div className="grid grid-cols-3 gap-1 text-[10px] mb-1 bg-white/60 p-1.5 rounded border border-slate-100 shadow-sm">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="text-slate-400 scale-90 origin-left flex items-center gap-0.5"><Calendar className="w-2.5 h-2.5" />立项</span>
+                                                                        <span className="font-mono text-slate-600 font-medium">{proj.startDate}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col text-center border-l border-r border-slate-200/60 px-1">
+                                                                        <span className="text-slate-400 scale-90">传统发布</span>
+                                                                        <span className="font-mono text-slate-400 text-[10px]">{proj.originalEndDate}</span>
+                                                                    </div>
+                                                                    <div className="flex flex-col text-right">
+                                                                        <span className={`${isClassA ? "text-violet-600" : "text-blue-600"} scale-90 origin-right font-bold`}>AI发布</span>
+                                                                        <span className="font-mono font-bold text-slate-700">{proj.actualEndDate}</span>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Original Plan Bar */}
+                                                                <div className="flex items-center justify-between text-[10px] text-slate-400 mb-0.5 mt-1">
+                                                                    <span>原计划周期</span>
+                                                                    <span className="font-mono">{proj.baselineDays}天</span>
+                                                                </div>
+                                                                <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                                    <div className="h-full bg-slate-300 w-full"></div>
+                                                                </div>
+
+                                                                {/* Actual AI Mode Bar */}
+                                                                <div className="flex items-center justify-between text-xs font-bold text-slate-700 mt-1 mb-0.5">
+                                                                    <span className={isClassA ? "text-violet-700" : "text-blue-700"}>AI Native 周期</span>
+                                                                    <span className="font-mono">{proj.actualDays}天</span>
+                                                                </div>
+                                                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex">
+                                                                    <div 
+                                                                        className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} 
+                                                                        style={{width: `${(proj.actualDays/proj.baselineDays)*100}%`}}
+                                                                    ></div>
+                                                                    {/* Improvement Highlight (Empty space represents saved time) */}
+                                                                    <div className="h-full bg-emerald-400/20 w-full"></div> 
+                                                                </div>
+                                                                
+                                                                <div className="flex justify-end mt-1">
+                                                                    <span className="text-[10px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded border border-emerald-100 font-bold flex items-center gap-1 group-hover/cell:bg-emerald-100 group-hover/cell:scale-105 transition-all">
+                                                                        <TrendingUp className="w-3 h-3" /> 提效 {efficiency}% <ChevronRight className="w-3 h-3" />
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Silicon Content */}
+                                                        <td className="p-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex-1">
+                                                                    <div className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} style={{width: `${proj.silicon}%`}}></div>
+                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-600 w-8">{proj.silicon}%</span>
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Quality */}
+                                                        <td className="p-4 text-center">
+                                                            <div className={`inline-flex items-center px-2 py-1 rounded border text-xs font-bold ${proj.passRate > 90 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+                                                                {proj.passRate}%
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Automation */}
+                                                        <td className="p-4">
+                                                            <div className="text-xs">
+                                                                <div className="flex items-center gap-2 text-slate-600 mb-1">
+                                                                    <Bot className="w-3 h-3 text-slate-400" />
+                                                                    <span>Gen: <span className="font-mono">{proj.autoGen}</span></span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-slate-600">
+                                                                    <CheckCircle2 className="w-3 h-3 text-slate-400" />
+                                                                    <span>Exec: <span className="font-mono">{proj.autoExec}</span></span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            );
+          }
+          case 'active_projects': {
               return (
                  <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
@@ -262,7 +683,8 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                     </tbody>
                  </table>
               );
-          case 'manpower':
+          }
+          case 'manpower': {
                // Dynamic mock data for AI stats based on system
                // Higher AI ratio for AI BG
                const aiRatio = systemId === 'aibg' ? 0.85 : (systemId === 'platform' ? 0.45 : systemId === 'security' ? 0.18 : 0.12);
@@ -370,7 +792,8 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                     </table>
                 </div>
               );
-          case 'quality':
+            }
+          case 'quality': {
                // 1. FILTERING LOGIC
                const filteredData = MOCK_QUALITY_DATASET.filter(row => {
                   if (qualityFilters.product !== 'all' && row.product !== qualityFilters.product) return false;
@@ -476,8 +899,8 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                       ].map((card, i) => (
                          <div key={i} className={`rounded-lg p-3 border shadow-[0_2px_4px_rgba(0,0,0,0.02)] flex flex-col justify-between hover:shadow-md transition-shadow ${card.color} ${card.bg}`}>
                             <div className="flex flex-col items-center mb-2">
-                               <div className="mb-2 p-1.5 rounded-full bg-slate-50">{card.icon}</div>
-                               <div className="text-[11px] text-slate-500 font-medium text-center leading-tight h-8 flex items-center">{card.label}</div>
+                                <div className="mb-2 p-1.5 rounded-full bg-slate-50">{card.icon}</div>
+                                <div className="text-[11px] text-slate-500 font-medium text-center leading-tight h-8 flex items-center">{card.label}</div>
                             </div>
                             <div className="text-xl font-bold text-slate-800 text-center tracking-tight">{card.val}</div>
                             <div className="text-[9px] text-slate-400 text-center mt-2 pt-2 border-t border-slate-100 w-full truncate">{card.desc}</div>
@@ -646,7 +1069,8 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                    </div>
                 </div>
                );
-          case 'reuse':
+           }
+          case 'reuse': {
                return (
                 <table className="w-full text-left text-sm">
                     <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
@@ -683,6 +1107,7 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                     </tbody>
                 </table>
               );
+          }
           default:
               return <div className="p-8 text-center text-slate-500">暂无数据</div>;
       }
@@ -799,30 +1224,40 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
               </div>
           </DashboardWidget>
 
-          {/* 2. Shared Capability Reuse */}
-          <DashboardWidget 
-             title="公共能力复用" 
-             icon={<Layers className="w-4 h-4" />}
-             onClick={() => setActiveDrillDown('reuse')}
+          {/* 2. Shared Capability Reuse -> AI EFFICIENCY (Replaced for better visibility or added as new?) */}
+          {/* Let's Keep Reuse and ADD AI Efficiency as a new prominent one, maybe replacing "Active Projects" or shifting layout */}
+          
+          {/* AI NATIVE EFFICIENCY WIDGET (NEW) */}
+           <DashboardWidget 
+             title="AI Native 效能" 
+             icon={<Sparkles className="w-4 h-4" />}
+             className="border-violet-200 hover:border-violet-300"
+             onClick={() => setActiveDrillDown('ai_native')}
           >
              <div className="flex flex-col gap-2 h-full justify-center">
-                 <div className="flex justify-between items-center text-sm">
-                     <span className="text-slate-600">组件复用率</span>
-                     <span className="font-bold text-slate-800">68%</span>
-                 </div>
-                 <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                     <div className="h-full bg-emerald-500 w-[68%]"></div>
+                 <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-violet-700">42%</span>
+                    <span className="text-xs text-slate-500">平均硅含量</span>
                  </div>
                  
-                 <div className="mt-2 flex justify-between items-center text-sm">
-                     <span className="text-slate-600">重复造轮子</span>
-                     <span className="font-bold text-red-500">3 项</span>
+                 <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1 mb-2">
+                     <div className="h-full bg-violet-500 w-[42%] rounded-full"></div>
                  </div>
-                 <div className="text-[10px] text-slate-400">通过复用节省约 50 HC/年</div>
+
+                 <div className="flex items-center justify-between text-xs">
+                     <div className="flex items-center gap-1 text-slate-600">
+                        <Workflow className="w-3 h-3 text-slate-400" />
+                        <span>提效 30%</span>
+                     </div>
+                      <div className="flex items-center gap-1 text-slate-600">
+                        <Users className="w-3 h-3 text-slate-400" />
+                        <span>节省 75人/月</span>
+                     </div>
+                 </div>
              </div>
           </DashboardWidget>
 
-          {/* 3. Active Projects Overview (Replaced Integration Stability) */}
+          {/* 3. Active Projects Overview */}
           <DashboardWidget 
              title="在研项目总览" 
              icon={<LayoutGrid className="w-4 h-4" />}
@@ -856,7 +1291,7 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
              </div>
           </DashboardWidget>
 
-          {/* 4. Quality & Red Line (Replaced Resource Pool) */}
+          {/* 4. Quality & Red Line */}
           <DashboardWidget 
              title="体系质量红线监控" 
              icon={<ShieldCheck className="w-4 h-4" />}
@@ -951,11 +1386,12 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
           activeDrillDown === 'manpower' ? '体系人力资源分布详情' : 
           activeDrillDown === 'active_projects' ? '在研项目健康度列表' :
           activeDrillDown === 'quality' ? '体系质量红线监控' :
+          activeDrillDown === 'ai_native' ? 'AI Native 效能分析' :
           '公共能力复用分析'
         }
         isOpen={!!activeDrillDown}
         onClose={() => setActiveDrillDown(null)}
-        widthClass={activeDrillDown === 'quality' ? 'max-w-full m-4' : 'max-w-5xl'}
+        widthClass={activeDrillDown === 'quality' || activeDrillDown === 'ai_native' ? 'max-w-full m-4' : 'max-w-5xl'}
       >
         {renderDrillDownContent()}
       </SystemDrillDownModal>
