@@ -1,11 +1,52 @@
-import React, { useState } from 'react';
-import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, List, ChevronDown, RefreshCw } from 'lucide-react';
 
 interface SystemLevelDashboardProps {
   onSelectProductLine: (id: string, name: string) => void;
   systemId?: string; // 'security' | 'cloud' | 'platform' | 'aibg'
   onSelectSystem?: (id: string) => void;
 }
+
+// --- Data Types for Quality Module ---
+interface QualityMetricRow {
+  id: string;
+  product: string;
+  project: string;
+  version: string;
+  team: string;
+  module: string;
+  feature: string;
+  
+  // Metrics
+  removalRate: number; // Percentage 0-100
+  effectiveTD: number;
+  reopenCount: number;
+  reopenUsers: number;
+  changeTriggerRate: number; // Percentage
+  changeTriggerCount: number;
+  uncoveredRate: number;
+  uncoveredCount: number;
+  leakageRate: number; // Percentage
+  leakageCount: number;
+  legacyRate: number;
+  legacyCount: number;
+  diValue: number;
+  haltCount: number;
+  betaWeighted: number;
+  betaP1: number;
+  fixCycle: number;
+  closedTD: number;
+}
+
+// --- MOCK DATA CONSTRUCTION ---
+const MOCK_QUALITY_DATASET: QualityMetricRow[] = [
+  { id: '1', product: 'XDR', project: 'XDR 核心引擎升级', version: 'v3.0', team: '核心引擎组', module: '威胁检测', feature: 'AI模型', removalRate: 99.5, effectiveTD: 45, reopenCount: 1, reopenUsers: 1, changeTriggerRate: 0.2, changeTriggerCount: 1, uncoveredRate: 0, uncoveredCount: 0, leakageRate: 0.01, leakageCount: 1, legacyRate: 0.5, legacyCount: 2, diValue: 12, haltCount: 0, betaWeighted: 2, betaP1: 0, fixCycle: 2.5, closedTD: 120 },
+  { id: '2', product: 'XDR', project: 'XDR 核心引擎升级', version: 'v3.0', team: '数据平台组', module: '日志存储', feature: 'ES集群', removalRate: 98.2, effectiveTD: 30, reopenCount: 3, reopenUsers: 2, changeTriggerRate: 0.5, changeTriggerCount: 2, uncoveredRate: 1.5, uncoveredCount: 5, leakageRate: 0.05, leakageCount: 0, legacyRate: 1.2, legacyCount: 8, diValue: 25, haltCount: 1, betaWeighted: 5, betaP1: 0, fixCycle: 4.0, closedTD: 85 },
+  { id: '3', product: 'XDR', project: 'XDR 管理中心 UI', version: 'v2.5', team: '前端交互组', module: '控制台', feature: '大屏展示', removalRate: 92.0, effectiveTD: 25, reopenCount: 8, reopenUsers: 4, changeTriggerRate: 1.8, changeTriggerCount: 5, uncoveredRate: 5.0, uncoveredCount: 12, leakageRate: 0.1, leakageCount: 2, legacyRate: 2.5, legacyCount: 15, diValue: 45, haltCount: 2, betaWeighted: 10, betaP1: 1, fixCycle: 5.5, closedTD: 60 },
+  { id: '4', product: 'HCI', project: 'HCI 超融合 6.9', version: 'v6.9', team: '存储虚拟化', module: 'vSAN', feature: '纠删码', removalRate: 99.8, effectiveTD: 120, reopenCount: 0, reopenUsers: 0, changeTriggerRate: 0.05, changeTriggerCount: 0, uncoveredRate: 0.5, uncoveredCount: 2, leakageRate: 0.0, leakageCount: 0, legacyRate: 0.8, legacyCount: 5, diValue: 8, haltCount: 0, betaWeighted: 0, betaP1: 0, fixCycle: 3.0, closedTD: 250 },
+  { id: '5', product: 'HCI', project: 'HCI 超融合 6.9', version: 'v6.9', team: '计算虚拟化', module: 'Hypervisor', feature: '热迁移', removalRate: 99.0, effectiveTD: 80, reopenCount: 2, reopenUsers: 1, changeTriggerRate: 0.3, changeTriggerCount: 1, uncoveredRate: 1.0, uncoveredCount: 8, leakageRate: 0.02, leakageCount: 1, legacyRate: 1.5, legacyCount: 10, diValue: 20, haltCount: 0, betaWeighted: 8, betaP1: 0, fixCycle: 3.5, closedTD: 180 },
+  { id: '6', product: 'AC', project: 'AC 行为管理 v13', version: 'v13.0', team: '应用识别组', module: 'DPI引擎', feature: '规则库', removalRate: 96.5, effectiveTD: 60, reopenCount: 5, reopenUsers: 2, changeTriggerRate: 0.8, changeTriggerCount: 3, uncoveredRate: 2.0, uncoveredCount: 10, leakageRate: 0.08, leakageCount: 3, legacyRate: 3.0, legacyCount: 25, diValue: 50, haltCount: 1, betaWeighted: 15, betaP1: 2, fixCycle: 6.0, closedTD: 110 },
+];
 
 // Reusable Widget
 const DashboardWidget: React.FC<{ 
@@ -36,36 +77,43 @@ const SystemDrillDownModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-}> = ({ title, isOpen, onClose, children }) => {
+  widthClass?: string;
+}> = ({ title, isOpen, onClose, children, widthClass = "max-w-5xl" }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200"
+        className={`bg-white rounded-xl shadow-2xl w-full ${widthClass} max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
              <div className="w-1 h-5 bg-indigo-600 rounded-full" />
-             <h3 className="text-lg font-bold text-slate-800">{title} - 体系级透视</h3>
+             <h3 className="text-lg font-bold text-slate-800">{title}</h3>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <X className="w-5 h-5 text-slate-500" />
           </button>
         </div>
         
-        <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex gap-2">
-           <div className="relative">
-              <Search className="w-4 h-4 absolute left-2 top-2 text-slate-400" />
-              <input type="text" placeholder="在体系内搜索..." className="pl-8 pr-4 py-1 text-sm border border-slate-200 rounded-md focus:outline-none focus:border-indigo-400 w-64" />
-           </div>
-           <button className="flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded text-xs text-slate-600 hover:text-indigo-600">
-              <Filter className="w-3 h-3" /> 筛选
-           </button>
-        </div>
+        {/* Only show default toolbar if NOT in quality view (quality has its own custom filter bar) */}
+        {!title.includes('质量') && (
+            <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex gap-2">
+            <div className="relative">
+                <Search className="w-4 h-4 absolute left-2 top-2 text-slate-400" />
+                <input type="text" placeholder="在体系内搜索..." className="pl-8 pr-4 py-1 text-sm border border-slate-200 rounded-md focus:outline-none focus:border-indigo-400 w-64" />
+            </div>
+            <button className="flex items-center gap-1 px-3 py-1 bg-white border border-slate-200 rounded text-xs text-slate-600 hover:text-indigo-600">
+                <Filter className="w-3 h-3" /> 筛选
+            </button>
+            </div>
+        )}
 
-        <div className="flex-1 overflow-auto p-0">
+        <div className="flex-1 overflow-auto p-4 bg-slate-50/50">
           {children}
+        </div>
+        <div className="p-3 border-t border-slate-100 text-xs text-slate-400 flex justify-end bg-slate-50 rounded-b-xl">
+           IPD 质量度量系统 v2.4 (System Level)
         </div>
       </div>
     </div>
@@ -74,6 +122,16 @@ const SystemDrillDownModal: React.FC<{
 
 export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSelectProductLine, systemId = 'security', onSelectSystem }) => {
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
+
+  // --- Quality Filter State ---
+  const [qualityFilters, setQualityFilters] = useState({
+    product: 'all',
+    project: 'all',
+    version: 'all',
+    team: 'all',
+    module: 'all',
+    feature: 'all'
+  });
 
   // Define data for each system
   const systemData = {
@@ -145,12 +203,19 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
 
   const currentSystemData = systemData[systemId as keyof typeof systemData] || systemData.security;
 
+  // Helper icons
+  const StarIcon = ({ className }: { className: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+    </svg>
+  );
+
   const renderDrillDownContent = () => {
       switch (activeDrillDown) {
           case 'active_projects':
               return (
                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0">
+                    <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
                         <tr>
                             <th className="p-4">项目名称</th>
                             <th className="p-4">所属产线</th>
@@ -193,15 +258,6 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                             <td className="p-4"><span className="flex items-center gap-1 text-red-600 font-bold"><AlertCircle className="w-4 h-4"/> 风险</span></td>
                             <td className="p-4 text-red-600">-15%</td>
                             <td className="p-4 text-xs text-slate-500">供应链物料回货</td>
-                        </tr>
-                        {/* New AI BG Projects */}
-                         <tr className="hover:bg-slate-50">
-                            <td className="p-4 font-bold text-slate-700">数字人多模态交互引擎 v2</td>
-                            <td className="p-4 text-slate-600">销售数字人产品线</td>
-                            <td className="p-4"><span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">TR4 验证</span></td>
-                            <td className="p-4"><span className="flex items-center gap-1 text-green-600 font-bold"><CheckCircle2 className="w-4 h-4"/> 正常</span></td>
-                            <td className="p-4 text-slate-500">0%</td>
-                            <td className="p-4 text-xs text-slate-500">灰度测试</td>
                         </tr>
                     </tbody>
                  </table>
@@ -291,7 +347,7 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
 
                     {/* Department Table */}
                     <table className="w-full text-left text-sm border border-slate-200 rounded-lg overflow-hidden">
-                        <thead className="bg-slate-50 text-slate-500 font-medium">
+                        <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
                             <tr>
                                 <th className="p-4">产线/部门名称</th>
                                 <th className="p-4 text-right">编制 (HC)</th>
@@ -314,6 +370,282 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                     </table>
                 </div>
               );
+          case 'quality':
+               // 1. FILTERING LOGIC
+               const filteredData = MOCK_QUALITY_DATASET.filter(row => {
+                  if (qualityFilters.product !== 'all' && row.product !== qualityFilters.product) return false;
+                  if (qualityFilters.project !== 'all' && row.project !== qualityFilters.project) return false;
+                  if (qualityFilters.version !== 'all' && row.version !== qualityFilters.version) return false;
+                  if (qualityFilters.team !== 'all' && row.team !== qualityFilters.team) return false;
+                  if (qualityFilters.module !== 'all' && row.module !== qualityFilters.module) return false;
+                  if (qualityFilters.feature !== 'all' && row.feature !== qualityFilters.feature) return false;
+                  return true;
+               });
+
+               // 2. DYNAMIC AGGREGATION LOGIC
+               const aggregates = {
+                  removalRate: filteredData.length > 0 ? (filteredData.reduce((acc, curr) => acc + curr.removalRate, 0) / filteredData.length).toFixed(1) : '0.0',
+                  effectiveTD: filteredData.reduce((acc, curr) => acc + curr.effectiveTD, 0),
+                  reopenCount: filteredData.reduce((acc, curr) => acc + curr.reopenCount, 0),
+                  reopenUsers: filteredData.reduce((acc, curr) => acc + curr.reopenUsers, 0),
+                  changeTriggerRate: filteredData.length > 0 ? (filteredData.reduce((acc, curr) => acc + curr.changeTriggerRate, 0) / filteredData.length).toFixed(2) : '0.00',
+                  changeTriggerCount: filteredData.reduce((acc, curr) => acc + curr.changeTriggerCount, 0),
+                  uncoveredRate: filteredData.length > 0 ? (filteredData.reduce((acc, curr) => acc + curr.uncoveredRate, 0) / filteredData.length).toFixed(1) : '0.0',
+                  uncoveredCount: filteredData.reduce((acc, curr) => acc + curr.uncoveredCount, 0),
+                  leakageRate: filteredData.length > 0 ? (filteredData.reduce((acc, curr) => acc + curr.leakageRate, 0) / filteredData.length).toFixed(2) : '0.00',
+                  leakageCount: filteredData.reduce((acc, curr) => acc + curr.leakageCount, 0),
+                  legacyRate: filteredData.length > 0 ? (filteredData.reduce((acc, curr) => acc + curr.legacyRate, 0) / filteredData.length).toFixed(2) : '0.00',
+                  legacyCount: filteredData.reduce((acc, curr) => acc + curr.legacyCount, 0),
+                  diValue: filteredData.reduce((acc, curr) => acc + curr.diValue, 0),
+                  haltCount: filteredData.reduce((acc, curr) => acc + curr.haltCount, 0),
+                  betaWeighted: filteredData.reduce((acc, curr) => acc + curr.betaWeighted, 0),
+                  betaP1: filteredData.reduce((acc, curr) => acc + curr.betaP1, 0),
+                  fixCycle: filteredData.length > 0 ? (filteredData.reduce((acc, curr) => acc + curr.fixCycle, 0) / filteredData.length).toFixed(1) : '0.0',
+                  closedTD: filteredData.reduce((acc, curr) => acc + curr.closedTD, 0),
+               };
+
+               // Helper for dynamic options
+               const getOptions = (key: keyof QualityMetricRow) => {
+                  return Array.from(new Set(MOCK_QUALITY_DATASET.map(item => item[key] as string))).sort();
+               };
+
+               return (
+                <div className="space-y-6">
+
+                   {/* DYNAMIC FILTER BAR */}
+                   <div className="flex flex-wrap items-center bg-slate-50 border border-slate-200 rounded-lg p-2 gap-4 shadow-sm">
+                        {[
+                            { label: '产品', key: 'product', options: getOptions('product') },
+                            { label: '项目', key: 'project', options: getOptions('project') },
+                            { label: '版本', key: 'version', options: getOptions('version') },
+                            { label: '团队', key: 'team', options: getOptions('team') },
+                            { label: '功能模块', key: 'module', options: getOptions('module') },
+                            { label: '业务特征', key: 'feature', options: getOptions('feature') }
+                        ].map((f) => (
+                            <div key={f.key} className="flex items-center gap-2 border-r border-slate-200 pr-4 last:border-0 last:pr-0">
+                                <span className="text-xs font-bold text-slate-700">{f.label}</span>
+                                <div className="relative">
+                                    <select 
+                                      className="appearance-none bg-white border border-slate-200 pl-3 pr-8 py-1.5 rounded text-xs text-slate-600 hover:border-blue-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors min-w-[120px] cursor-pointer shadow-sm"
+                                      value={qualityFilters[f.key as keyof typeof qualityFilters]}
+                                      onChange={(e) => setQualityFilters(prev => ({ ...prev, [f.key]: e.target.value }))}
+                                    >
+                                        <option value="all">无限制</option>
+                                        {f.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                                    </select>
+                                    <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                </div>
+                            </div>
+                        ))}
+                        
+                        <button 
+                          className="ml-auto text-xs text-blue-600 hover:underline px-2 flex items-center gap-1"
+                          onClick={() => setQualityFilters({
+                            product: 'all', project: 'all', version: 'all', team: 'all', module: 'all', feature: 'all'
+                          })}
+                        >
+                          <RefreshCw className="w-3 h-3" /> 重置筛选
+                        </button>
+                    </div>
+
+                   {/* Logic Banner */}
+                   <div className="bg-indigo-50/50 border border-indigo-100 p-3 rounded-lg flex items-start gap-3">
+                       <div className="bg-indigo-100 text-indigo-600 p-1.5 rounded-full mt-0.5">
+                          <BrainCircuit className="w-4 h-4" />
+                       </div>
+                       <div>
+                          <h5 className="text-sm font-bold text-slate-700">体系质量度量逻辑 (System Quality Metric Logic)</h5>
+                          <p className="text-xs text-slate-600 mt-1">
+                             基于 IPD 全流程，通过<b>缺陷前移 (Shift Left)</b> 减少后期返工，监控<b>漏测率</b>与<b>覆盖率</b>确保测试有效性，并严格控制<b>历史遗留问题</b>与<b>变动风险</b>，实现全体系的质量闭环管理。
+                          </p>
+                       </div>
+                   </div>
+
+                   {/* DYNAMIC HEADER CARDS */}
+                   <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3">
+                      {[
+                        { label: '缺陷前移率', val: `${aggregates.removalRate}%`, icon: <TrendingUp className="w-4 h-4 text-blue-500"/>, color: 'border-blue-200', desc: `有效TD数 ${aggregates.effectiveTD}个`, bg: 'bg-white' },
+                        { label: '多次reopen数', val: aggregates.reopenCount, icon: <Repeat className="w-4 h-4 text-amber-500"/>, color: 'border-amber-200', desc: `人数 ${aggregates.reopenUsers}人`, bg: 'bg-white' },
+                        { label: '改动引发率', val: `${aggregates.changeTriggerRate}%`, icon: <GitBranch className="w-4 h-4 text-blue-500"/>, color: 'border-blue-200', desc: `引发数 ${aggregates.changeTriggerCount}个`, bg: 'bg-white' },
+                        { label: '案例无覆盖率', val: aggregates.uncoveredRate, icon: <FileWarning className="w-4 h-4 text-amber-500"/>, color: 'border-amber-200', desc: `无覆盖数 ${aggregates.uncoveredCount}个`, bg: 'bg-white' },
+                        { label: '漏测率', val: `${aggregates.leakageRate}%`, icon: <FilterX className="w-4 h-4 text-amber-500"/>, color: 'border-amber-200', desc: `漏测数 ${aggregates.leakageCount}个`, bg: 'bg-white' },
+                        { label: '历史遗留问题率', val: `${aggregates.legacyRate}%`, icon: <Archive className="w-4 h-4 text-blue-500"/>, color: 'border-blue-200', desc: `遗留数 ${aggregates.legacyCount}个`, bg: 'bg-white' },
+                        { label: '挂起DI值', val: aggregates.diValue, icon: <PauseCircle className="w-4 h-4 text-blue-500"/>, color: 'border-blue-200', desc: `Halt数 ${aggregates.haltCount}个`, bg: 'bg-white' },
+                        { label: 'Beta客户问题', val: aggregates.betaWeighted, icon: <Star className="w-4 h-4 text-red-500"/>, color: 'border-red-200', desc: `P1问题 ${aggregates.betaP1}个`, bg: 'bg-white' },
+                        { label: '缺陷平均生命周期', val: aggregates.fixCycle, icon: <Hourglass className="w-4 h-4 text-blue-500"/>, color: 'border-blue-200', desc: `结束有效TD ${aggregates.closedTD}个`, bg: 'bg-white' },
+                      ].map((card, i) => (
+                         <div key={i} className={`rounded-lg p-3 border shadow-[0_2px_4px_rgba(0,0,0,0.02)] flex flex-col justify-between hover:shadow-md transition-shadow ${card.color} ${card.bg}`}>
+                            <div className="flex flex-col items-center mb-2">
+                               <div className="mb-2 p-1.5 rounded-full bg-slate-50">{card.icon}</div>
+                               <div className="text-[11px] text-slate-500 font-medium text-center leading-tight h-8 flex items-center">{card.label}</div>
+                            </div>
+                            <div className="text-xl font-bold text-slate-800 text-center tracking-tight">{card.val}</div>
+                            <div className="text-[9px] text-slate-400 text-center mt-2 pt-2 border-t border-slate-100 w-full truncate">{card.desc}</div>
+                         </div>
+                      ))}
+                   </div>
+
+                   {/* DYNAMIC DETAILED GRID TABLE */}
+                   <div className="bg-white rounded-lg border border-slate-200 overflow-hidden shadow-sm">
+                       <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                          <h4 className="font-bold text-slate-700 text-sm">筛选结果列表 (Filtered Results)</h4>
+                          <div className="text-xs text-slate-500">共找到 {filteredData.length} 条数据</div>
+                       </div>
+                       <div className="overflow-x-auto">
+                           <table className="w-full text-xs text-left min-w-[1200px]">
+                              <thead className="bg-[#6B8ABC] text-white font-medium">
+                                 <tr>
+                                    <th className="p-3 border-r border-blue-400/30 w-48">团队/模块</th>
+                                    <th colSpan={2} className="p-3 text-center border-r border-blue-400/30 bg-[#5A79AB]">缺陷前移率</th>
+                                    <th colSpan={2} className="p-3 text-center border-r border-blue-400/30 bg-[#5A79AB]">reopen</th>
+                                    <th colSpan={3} className="p-3 text-center border-r border-blue-400/30 bg-[#5A79AB]">改动引发</th>
+                                    <th colSpan={2} className="p-3 text-center border-r border-blue-400/30 bg-[#5A79AB]">案例覆盖</th>
+                                    <th colSpan={2} className="p-3 text-center bg-[#5A79AB]">漏测</th>
+                                 </tr>
+                                 <tr className="bg-[#7D9AC9]">
+                                    <th className="p-2 border-r border-blue-400/30 pl-3">名称 (Team - Module)</th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">缺陷前移率 <StarIcon className="w-3 h-3 inline text-yellow-300"/></th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">有效TD数</th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">多次reopen数 <StarIcon className="w-3 h-3 inline text-yellow-300"/></th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">责任人人数</th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">改动引发率 <StarIcon className="w-3 h-3 inline text-yellow-300"/></th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">多次改动人数</th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">改动引发数</th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">无覆盖率 <StarIcon className="w-3 h-3 inline text-yellow-300"/></th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">无覆盖数</th>
+                                    <th className="p-2 text-center border-r border-blue-400/30">漏测率 <StarIcon className="w-3 h-3 inline text-yellow-300"/></th>
+                                    <th className="p-2 text-center">执行漏测数 <StarIcon className="w-3 h-3 inline text-yellow-300"/></th>
+                                 </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                 {/* Render Filtered Data */}
+                                 {filteredData.map((row, idx) => (
+                                    <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                                       <td className="p-3 font-medium text-slate-700 border-r border-slate-100">
+                                          <div className="flex flex-col">
+                                              <span>{row.team}</span>
+                                              <span className="text-[10px] text-slate-400">{row.module} - {row.feature}</span>
+                                          </div>
+                                       </td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100 bg-blue-50/30">{row.removalRate}%</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100 bg-blue-50/30">{row.effectiveTD}</td>
+                                       <td className={`p-3 text-center font-mono border-r border-slate-100 ${row.reopenCount > 3 ? 'text-amber-600 font-bold' : 'text-slate-600'}`}>{row.reopenCount}</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100">{row.reopenUsers}</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100 bg-blue-50/30">{row.changeTriggerRate}%</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100 bg-blue-50/30">0</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100 bg-blue-50/30">{row.changeTriggerCount}</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100">{row.uncoveredRate}</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100">{row.uncoveredCount}</td>
+                                       <td className="p-3 text-center font-mono border-r border-slate-100 bg-blue-50/30">{row.leakageRate}%</td>
+                                       <td className="p-3 text-center font-mono bg-blue-50/30">{row.leakageCount}</td>
+                                    </tr>
+                                 ))}
+                                 
+                                 {filteredData.length === 0 && (
+                                     <tr><td colSpan={12} className="p-8 text-center text-slate-400">没有符合筛选条件的数据</td></tr>
+                                 )}
+
+                                  {/* DYNAMIC AGGREGATE ROW */}
+                                 <tr className="bg-[#DAE3F3] font-bold text-slate-800">
+                                    <td className="p-3 border-r border-white">合计 (Total)</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.removalRate}%</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.effectiveTD}</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.reopenCount}</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.reopenUsers}</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.changeTriggerRate}%</td>
+                                    <td className="p-3 text-center border-r border-white">0</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.changeTriggerCount}</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.uncoveredRate}</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.uncoveredCount}</td>
+                                    <td className="p-3 text-center border-r border-white">{aggregates.leakageRate}%</td>
+                                    <td className="p-3 text-center">{aggregates.leakageCount}</td>
+                                 </tr>
+                              </tbody>
+                           </table>
+                       </div>
+                   </div>
+
+                   {/* 3. Analysis Charts */}
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                      {/* Reopen Analysis Chart */}
+                      <div className="bg-white rounded-lg p-2">
+                         <h5 className="font-bold text-slate-700 text-sm mb-4 pl-2 border-l-4 border-slate-700">多次reopen分析</h5>
+                         <div className="h-64 border-t border-r border-slate-100 relative pt-4">
+                            {/* Y Axis Labels */}
+                            <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-[10px] text-slate-400 py-2">
+                               <span>10</span>
+                               <span>8</span>
+                               <span>6</span>
+                               <span>4</span>
+                               <span>2</span>
+                               <span>0</span>
+                            </div>
+                            
+                            {/* Chart Area */}
+                            <div className="ml-10 h-full border-l border-b border-slate-200 relative flex items-end justify-around px-4">
+                               {/* Grid Lines */}
+                               {[0, 20, 40, 60, 80, 100].map((p, i) => (
+                                  <div key={i} className="absolute w-full border-t border-slate-100 border-dashed" style={{ bottom: `${p}%`, left: 0 }}></div>
+                               ))}
+                               
+                               {/* Dynamic Bars based on Filtered Data */}
+                               {filteredData.slice(0, 6).map((d, i) => (
+                                   <div key={i} className="relative flex flex-col items-center group w-8">
+                                       <div className="w-6 bg-amber-400 rounded-t hover:bg-amber-500 transition-all" style={{ height: `${Math.min((d.reopenCount / 10) * 100, 100)}%` }}></div>
+                                       <div className="text-[10px] text-slate-500 mt-1 truncate w-12 text-center" title={d.team}>{d.team}</div>
+                                       {/* Tooltip */}
+                                       <div className="absolute bottom-full mb-1 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                           {d.reopenCount} 次
+                                       </div>
+                                   </div>
+                               ))}
+                               
+                               {filteredData.length === 0 && <div className="absolute inset-0 flex items-center justify-center text-slate-300 text-xs">暂无数据</div>}
+                            </div>
+                            <div className="absolute -left-6 top-1/2 -rotate-90 text-[10px] text-slate-400">多次reopen数</div>
+                         </div>
+                      </div>
+
+                      {/* Change Analysis Chart */}
+                      <div className="bg-white rounded-lg p-2">
+                         <h5 className="font-bold text-slate-700 text-sm mb-4 pl-2 border-l-4 border-slate-700">多次改动引发分析</h5>
+                         <div className="h-64 border-t border-r border-slate-100 relative pt-4">
+                             {/* Y Axis Labels */}
+                            <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-between text-[10px] text-slate-400 py-2">
+                               <span>5</span>
+                               <span>4</span>
+                               <span>3</span>
+                               <span>2</span>
+                               <span>1</span>
+                               <span>0</span>
+                            </div>
+
+                            {/* Chart Area */}
+                            <div className="ml-10 h-full border-l border-b border-slate-200 relative flex items-end justify-around px-4">
+                                {/* Grid Lines */}
+                               {[0, 20, 40, 60, 80, 100].map((p, i) => (
+                                  <div key={i} className="absolute w-full border-t border-slate-100 border-dashed" style={{ bottom: `${p}%`, left: 0 }}></div>
+                               ))}
+                               
+                                {/* Dynamic Bars */}
+                                {filteredData.slice(0, 6).map((d, i) => (
+                                   <div key={i} className="relative flex flex-col items-center group w-8">
+                                       <div className="w-6 bg-blue-400 rounded-t hover:bg-blue-500 transition-all" style={{ height: `${Math.min((d.changeTriggerCount / 5) * 100, 100)}%` }}></div>
+                                       <div className="text-[10px] text-slate-500 mt-1 truncate w-12 text-center" title={d.team}>{d.team}</div>
+                                        <div className="absolute bottom-full mb-1 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                           {d.changeTriggerCount} 次
+                                       </div>
+                                   </div>
+                               ))}
+
+                               {filteredData.length === 0 && <div className="absolute inset-0 flex items-center justify-center text-slate-300 text-xs">暂无数据</div>}
+                            </div>
+                            <div className="absolute -left-6 top-1/2 -rotate-90 text-[10px] text-slate-400">改动引发数</div>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+               );
           case 'reuse':
                return (
                 <table className="w-full text-left text-sm">
@@ -524,34 +856,35 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
              </div>
           </DashboardWidget>
 
-          {/* 4. Cross-Product Resource Pool */}
+          {/* 4. Quality & Red Line (Replaced Resource Pool) */}
           <DashboardWidget 
-             title="公共资源池负载" 
-             icon={<Users className="w-4 h-4" />}
+             title="体系质量红线监控" 
+             icon={<ShieldCheck className="w-4 h-4" />}
+             onClick={() => setActiveDrillDown('quality')}
           >
              <div className="space-y-3">
                  <div className="flex justify-between items-center text-xs">
-                     <span>SRE 运维池</span>
-                     <span className="text-red-500 font-bold">98% (过载)</span>
+                     <span>Reopen 总数</span>
+                     <span className="text-red-500 font-bold">15 (超标)</span>
                  </div>
                  <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                     <div className="h-full bg-red-500 w-[98%] rounded-full"></div>
+                     <div className="h-full bg-red-500 w-[80%] rounded-full"></div>
                  </div>
 
                  <div className="flex justify-between items-center text-xs">
-                     <span>测试/QA 池</span>
-                     <span className="text-emerald-600 font-bold">85% (健康)</span>
+                     <span>严重问题 (S1)</span>
+                     <span className="text-emerald-600 font-bold">0 (安全)</span>
                  </div>
                  <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                     <div className="h-full bg-emerald-500 w-[85%] rounded-full"></div>
+                     <div className="h-full bg-emerald-500 w-[5%] rounded-full"></div>
                  </div>
 
                  <div className="flex justify-between items-center text-xs">
-                     <span>架构师池</span>
-                     <span className="text-amber-600 font-bold">92% (紧张)</span>
+                     <span>遗留 DI 值</span>
+                     <span className="text-amber-600 font-bold">54 (预警)</span>
                  </div>
                  <div className="h-1.5 w-full bg-slate-100 rounded-full">
-                     <div className="h-full bg-amber-500 w-[92%] rounded-full"></div>
+                     <div className="h-full bg-amber-500 w-[60%] rounded-full"></div>
                  </div>
              </div>
           </DashboardWidget>
@@ -617,10 +950,12 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
         title={
           activeDrillDown === 'manpower' ? '体系人力资源分布详情' : 
           activeDrillDown === 'active_projects' ? '在研项目健康度列表' :
+          activeDrillDown === 'quality' ? '体系质量红线监控' :
           '公共能力复用分析'
         }
         isOpen={!!activeDrillDown}
         onClose={() => setActiveDrillDown(null)}
+        widthClass={activeDrillDown === 'quality' ? 'max-w-full m-4' : 'max-w-5xl'}
       >
         {renderDrillDownContent()}
       </SystemDrillDownModal>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PROJECTS_LIST } from '../constants';
-import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter, BrainCircuit, Cpu, Sparkles } from 'lucide-react';
+import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter, BrainCircuit, Cpu, Sparkles, AlertTriangle, Bug, FileCode, CheckCircle2, History, Microscope, Scale, GitBranch, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass } from 'lucide-react';
 import { Project } from '../types';
 
 interface ProductDashboardProps {
@@ -15,7 +15,25 @@ const DASHBOARD_MOCK_DATA: Record<string, any> = {
     cycle: { value: '8.5', trend: 'down', trendValue: '12%', unit: '月' },
     roi: { ratio: '1:4.2', input: '50M', revenue: '210M' },
     battlefield: { current: 1, total: 5, name: '实战攻防' },
-    quality: { closed: 12, total: 15, topN: '年度累计 TopN' },
+    quality: { 
+      closed: 12, total: 15, topN: '年度累计 TopN',
+      metrics: {
+        removalRate: '100.0%', effectiveTD: 5,
+        reopenCount: 0, reopenUsers: 0,
+        changeTriggerRate: '0.0%', changeTriggerCount: 0,
+        uncoveredRate: '0', uncoveredCount: 0, 
+        leakageRate: '0%', leakageCount: 0,
+        legacyRate: '0.0%', legacyCount: 0, 
+        diValue: 0, haltCount: 0,
+        betaWeighted: 0, betaP1: 0,
+        fixCycle: 0, closedTD: 0
+      },
+      tableData: [
+        { name: 'HC16.12.0_VT', removalRate: '100.0%', effectiveTD: 5, reopen: 0, changeRate: '0.0%', leakage: '0.0%', coverage: '100%' },
+        { name: 'XDR 核心引擎组', removalRate: '99.5%', effectiveTD: 12, reopen: 1, changeRate: '0.2%', leakage: '0.01%', coverage: '98%' },
+        { name: 'XDR 管理中心 UI', removalRate: '92.0%', effectiveTD: 25, reopen: 5, changeRate: '1.5%', leakage: '0.1%', coverage: '88%' }
+      ]
+    },
     version: { count: '2.0', reuse: '68%' },
     manpower: { 
       total: 350, 
@@ -28,7 +46,24 @@ const DASHBOARD_MOCK_DATA: Record<string, any> = {
     cycle: { value: '6.5', trend: 'down', trendValue: '5%', unit: '月' },
     roi: { ratio: '1:3.8', input: '80M', revenue: '304M' },
     battlefield: { current: 2, total: 4, name: '企业级云化' },
-    quality: { closed: 8, total: 10, topN: '年度累计 TopN' },
+    quality: { 
+      closed: 8, total: 10, topN: '年度累计 TopN',
+      metrics: {
+        removalRate: '99.2%', effectiveTD: 8,
+        reopenCount: 2, reopenUsers: 1,
+        changeTriggerRate: '0.1%', changeTriggerCount: 1,
+        uncoveredRate: '2', uncoveredCount: 5,
+        leakageRate: '0.01%', leakageCount: 1,
+        legacyRate: '1.5%', legacyCount: 3,
+        diValue: 8, haltCount: 2,
+        betaWeighted: 5, betaP1: 0,
+        fixCycle: 3.2, closedTD: 45
+      },
+      tableData: [
+        { name: 'HCI 存储层', removalRate: '100%', effectiveTD: 2, reopen: 0, changeRate: '0.0%', leakage: '0.0%', coverage: '99%' },
+        { name: 'HCI 计算虚拟化', removalRate: '99.5%', effectiveTD: 8, reopen: 0, changeRate: '0.1%', leakage: '0.0%', coverage: '97%' },
+      ]
+    },
     version: { count: '3.0', reuse: '75%' },
     manpower: { 
       total: 350, 
@@ -36,64 +71,26 @@ const DASHBOARD_MOCK_DATA: Record<string, any> = {
       aiStats: { total: 25, algo: 5, eng: 15, native: 5 }
     }
   },
-  '天问': {
-    competitiveness: { rank: 'No.2', score: '4.5', voc: '88.0', nps: '+30', trend: '追赶竞对', quadrant: '挑战者' },
-    cycle: { value: '3.0', trend: 'down', trendValue: '20%', unit: '月' },
-    roi: { ratio: '1:1.5', input: '120M', revenue: '180M' },
-    battlefield: { current: 3, total: 3, name: 'AI 效能' },
-    quality: { closed: 5, total: 8, topN: '年度累计 TopN' },
-    version: { count: '12.0', reuse: '40%' },
-    manpower: { 
-      total: 150, 
-      growth: '90%',
-      aiStats: { total: 120, algo: 60, eng: 40, native: 20 }
-    }
-  },
-  '托管云': {
-    competitiveness: { rank: 'No.3', score: '4.2', voc: '85.0', nps: '+25', trend: '追赶竞对', quadrant: '挑战者' },
-    cycle: { value: '4.5', trend: 'stable', trendValue: '0%', unit: '月' },
-    roi: { ratio: '1:2.8', input: '60M', revenue: '168M' },
-    battlefield: { current: 1, total: 2, name: '数据库上云' },
-    quality: { closed: 20, total: 25, topN: '年度累计 TopN' },
-    version: { count: '4.0', reuse: '55%' },
-    manpower: { 
-      total: 300, 
-      growth: '30%',
-      aiStats: { total: 30, algo: 5, eng: 20, native: 5 }
-    }
-  },
-  '数字人': {
-    competitiveness: { rank: 'No.1', score: '4.8', voc: '94.0', nps: '+62', trend: '领先竞对', quadrant: '领跑者' },
-    cycle: { value: '4.0', trend: 'down', trendValue: '15%', unit: '月' },
-    roi: { ratio: '1:5.5', input: '40M', revenue: '220M' },
-    battlefield: { current: 1, total: 2, name: '电商直播' },
-    quality: { closed: 18, total: 20, topN: '季度 TopN' },
-    version: { count: '6.0', reuse: '80%' },
-    manpower: { 
-      total: 350, 
-      growth: '80%',
-      aiStats: { total: 280, algo: 80, eng: 100, native: 100 }
-    }
-  },
-  '具身智能': {
-    competitiveness: { rank: 'No.2', score: '4.4', voc: '85.0', nps: '+35', trend: '追赶竞对', quadrant: '挑战者' },
-    cycle: { value: '12.0', trend: 'stable', trendValue: '0%', unit: '月' },
-    roi: { ratio: '1:0.5', input: '100M', revenue: '50M' }, // Low ROI, R&D heavy
-    battlefield: { current: 1, total: 1, name: '柔性制造' },
-    quality: { closed: 5, total: 8, topN: '年度 TopN' },
-    version: { count: '1.0', reuse: '45%' },
-    manpower: { 
-      total: 250, 
-      growth: '120%',
-      aiStats: { total: 200, algo: 120, eng: 60, native: 20 }
-    }
-  },
   'DEFAULT': {
     competitiveness: { rank: 'No.1', score: '4.6', voc: '90.0', nps: '+50', trend: '领先竞对', quadrant: '领跑者' },
     cycle: { value: '7.0', trend: 'stable', trendValue: '0%', unit: '月' },
     roi: { ratio: '1:3.0', input: '40M', revenue: '120M' },
     battlefield: { current: 1, total: 3, name: '战略新市场' },
-    quality: { closed: 10, total: 12, topN: '年度累计 TopN' },
+    quality: { 
+      closed: 10, total: 12, topN: '年度累计 TopN', 
+      metrics: { 
+         removalRate: '95%', effectiveTD: 10,
+         reopenCount: 5, reopenUsers: 2,
+         changeTriggerRate: '1.0%', changeTriggerCount: 2,
+         uncoveredRate: '5', uncoveredCount: 10,
+         leakageRate: '0.05%', leakageCount: 1,
+         legacyRate: '2.0%', legacyCount: 4,
+         diValue: 20, haltCount: 1,
+         betaWeighted: 10, betaP1: 1,
+         fixCycle: 5.0, closedTD: 50
+      }, 
+      tableData: [] 
+    },
     version: { count: '2.0', reuse: '60%' },
     manpower: { 
       total: 200, 
@@ -133,18 +130,19 @@ const DrillDownModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-}> = ({ title, isOpen, onClose, children }) => {
+  widthClass?: string;
+}> = ({ title, isOpen, onClose, children, widthClass = "max-w-7xl" }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div 
-        className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] flex flex-col animate-in zoom-in-95 duration-200"
+        className={`bg-white rounded-xl shadow-2xl w-full ${widthClass} max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between p-4 border-b border-slate-100">
           <div className="flex items-center gap-2">
              <div className="w-1 h-5 bg-blue-600 rounded-full" />
-             <h3 className="text-lg font-bold text-slate-800">{title} - 详细分析</h3>
+             <h3 className="text-lg font-bold text-slate-800">{title}</h3>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
             <X className="w-5 h-5 text-slate-500" />
@@ -162,12 +160,12 @@ const DrillDownModal: React.FC<{
            </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-0">
+        <div className="flex-1 overflow-auto p-4 bg-slate-50/50">
           {children}
         </div>
         
         <div className="p-3 border-t border-slate-100 text-xs text-slate-400 flex justify-end bg-slate-50 rounded-b-xl">
-           显示 1 - {React.Children.count(children) > 0 ? '10' : '0'} 条记录
+           IPD 质量度量系统 v2.4 (Product Line Level)
         </div>
       </div>
     </div>
@@ -181,13 +179,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
   const getFilterKeyword = (name: string) => {
     if (name.includes('XDR')) return 'XDR';
     if (name.includes('HCI')) return 'HCI';
-    if (name.includes('天问')) return '天问';
-    if (name.includes('托管云')) return '托管云';
-    if (name.includes('AC')) return 'AC';
-    if (name.includes('AF')) return 'AF';
-    if (name.includes('数字人')) return '数字人';
-    if (name.includes('具身智能')) return '具身智能';
-    return '';
+    return 'DEFAULT';
   };
 
   const filterKeyword = getFilterKeyword(productLineName);
@@ -196,7 +188,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
   const data = DASHBOARD_MOCK_DATA[filterKeyword] || DASHBOARD_MOCK_DATA['DEFAULT'];
 
   // Filter the projects
-  const filteredProjects = filterKeyword 
+  const filteredProjects = filterKeyword !== 'DEFAULT'
     ? PROJECTS_LIST.filter(p => p.projectSet?.includes(filterKeyword))
     : PROJECTS_LIST;
 
@@ -206,7 +198,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
     switch (activeDrillDown) {
       case 'competitiveness':
         return (
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
             <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
               <tr>
                 <th className="p-4">评估维度</th>
@@ -247,7 +239,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
         );
       case 'voc':
         return (
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
              <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
               <tr>
                 <th className="p-4">客户名称</th>
@@ -280,7 +272,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
         );
       case 'cycle':
         return (
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
              <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
               <tr>
                 <th className="p-4">项目名称</th>
@@ -313,7 +305,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
         );
       case 'roi':
         return (
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
              <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
               <tr>
                 <th className="p-4">产品线/子产品</th>
@@ -346,7 +338,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
         );
       case 'battlefield':
          return (
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
              <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
               <tr>
                 <th className="p-4">战略战场名称</th>
@@ -378,37 +370,68 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
           </table>
          );
       case 'quality':
+         // Simplified Product Line View
+         const qm = data.quality.metrics || {};
          return (
-          <table className="w-full text-left text-sm">
-             <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
-              <tr>
-                <th className="p-4">问题编号</th>
-                <th className="p-4">严重级别</th>
-                <th className="p-4 w-96">问题描述</th>
-                <th className="p-4">来源</th>
-                <th className="p-4">发现阶段</th>
-                <th className="p-4">当前状态</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-               <tr>
-                 <td className="p-4 font-mono text-slate-500">ISSUE-2024-882</td>
-                 <td className="p-4"><span className="text-red-600 font-bold bg-red-50 px-2 py-1 rounded text-xs">S1 致命</span></td>
-                 <td className="p-4">高并发场景下网关内存泄漏导致 OOM</td>
-                 <td className="p-4">内部压测</td>
-                 <td className="p-4">TR5 验收</td>
-                 <td className="p-4"><span className="text-green-600 text-xs flex items-center gap-1"><ShieldCheck className="w-3 h-3"/> 已闭环</span></td>
-               </tr>
-               <tr>
-                 <td className="p-4 font-mono text-slate-500">ISSUE-2024-901</td>
-                 <td className="p-4"><span className="text-amber-600 font-bold bg-amber-50 px-2 py-1 rounded text-xs">S2 严重</span></td>
-                 <td className="p-4">控制台在 IE11 浏览器下部分按钮无法点击</td>
-                 <td className="p-4">Beta客户</td>
-                 <td className="p-4">Beta 发布</td>
-                 <td className="p-4"><span className="text-amber-600 text-xs">修复中 (预计 2天)</span></td>
-               </tr>
-            </tbody>
-          </table>
+           <div className="space-y-4">
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                      <h4 className="font-bold text-slate-700">本产线质量概况 (Product Line Quality Overview)</h4>
+                      <span className="text-xs text-slate-500">Updated: Today</span>
+                  </div>
+                  
+                  {/* Simplified 4-Grid for Product Line */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                       <div className="bg-white p-3 rounded border border-blue-100">
+                          <div className="text-xs text-slate-500 mb-1">遗留缺陷总数</div>
+                          <div className="text-2xl font-bold text-blue-600">{qm.legacyCount || 12}</div>
+                       </div>
+                       <div className="bg-white p-3 rounded border border-amber-100">
+                          <div className="text-xs text-slate-500 mb-1">网上问题 (DI)</div>
+                          <div className="text-2xl font-bold text-amber-600">{qm.diValue || 5}</div>
+                       </div>
+                       <div className="bg-white p-3 rounded border border-green-100">
+                          <div className="text-xs text-slate-500 mb-1">缺陷前移率</div>
+                          <div className="text-2xl font-bold text-green-600">{qm.removalRate}</div>
+                       </div>
+                        <div className="bg-white p-3 rounded border border-purple-100">
+                          <div className="text-xs text-slate-500 mb-1">漏测率</div>
+                          <div className="text-2xl font-bold text-purple-600">{qm.leakageRate}</div>
+                       </div>
+                  </div>
+              </div>
+
+              {/* Simple Project List */}
+              <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                   <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 font-bold text-sm text-slate-700">
+                      项目质量状态
+                   </div>
+                   <table className="w-full text-sm text-left">
+                       <thead className="bg-slate-50 text-slate-500 font-medium">
+                           <tr>
+                               <th className="p-3 pl-4">项目名称</th>
+                               <th className="p-3">阶段</th>
+                               <th className="p-3">Bug数</th>
+                               <th className="p-3 text-center">状态</th>
+                           </tr>
+                       </thead>
+                       <tbody className="divide-y divide-slate-100">
+                           {filteredProjects.map(p => (
+                               <tr key={p.id} className="hover:bg-slate-50">
+                                   <td className="p-3 pl-4 font-medium text-slate-700">{p.name}</td>
+                                   <td className="p-3 text-xs text-slate-500">TR4</td>
+                                   <td className="p-3 font-mono">23</td>
+                                   <td className="p-3 text-center">
+                                       <span className={`px-2 py-0.5 rounded text-xs ${p.status === 'normal' ? 'bg-green-100 text-green-700' : p.status === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                                           {p.status}
+                                       </span>
+                                   </td>
+                               </tr>
+                           ))}
+                       </tbody>
+                   </table>
+              </div>
+           </div>
          );
       case 'manpower':
          const aiStats = data.manpower.aiStats || { total: 0, algo: 0, eng: 0, native: 0 };
@@ -552,6 +575,13 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
     }
   };
 
+  // Helper icons
+  const StarIcon = ({ className }: { className: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path fillRule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clipRule="evenodd" />
+    </svg>
+  );
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       
@@ -690,56 +720,11 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
            </div>
         </DashboardWidget>
 
-        {/* 5. 产品年度新战场突破数 */}
-        <DashboardWidget 
-          title="新战场/新机会点突破" 
-          icon={<Zap className="w-4 h-4" />} 
-          className="xl:col-span-2"
-          onClick={() => setActiveDrillDown('battlefield')}
-        >
-           <div className="flex items-center gap-4 mb-3">
-             <div className="flex-1">
-               <div className="flex justify-between text-sm mb-1">
-                 <span className="font-semibold text-slate-700">年度目标完成率</span>
-                 <span className="font-bold text-blue-600">{data.battlefield.current} / {data.battlefield.total}</span>
-               </div>
-               <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                 <div className="h-full bg-blue-500 w-[20%] rounded-full"></div>
-               </div>
-             </div>
-           </div>
-           
-           <div className="flex-1 overflow-auto pointer-events-none">
-             <table className="w-full text-xs text-left">
-               <thead className="text-slate-400 font-medium bg-slate-50 sticky top-0">
-                 <tr>
-                   <th className="p-2">战场/机会点</th>
-                   <th className="p-2">承载项目</th>
-                   <th className="p-2">进展</th>
-                   <th className="p-2 text-right">市场认可度</th>
-                 </tr>
-               </thead>
-               <tbody className="divide-y divide-slate-100">
-                 <tr>
-                   <td className="p-2 font-medium text-blue-800">{data.battlefield.name}</td>
-                   <td className="p-2">{productLineName.split(' ')[0]} 2.0</td>
-                   <td className="p-2"><span className="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">Pilot验证</span></td>
-                   <td className="p-2 text-right">高</td>
-                 </tr>
-                 <tr>
-                   <td className="p-2 font-medium text-slate-700">边缘计算节点</td>
-                   <td className="p-2">IoT Gateway Gen5</td>
-                   <td className="p-2"><span className="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">已上市</span></td>
-                   <td className="p-2 text-right">中 (试用中)</td>
-                 </tr>
-               </tbody>
-             </table>
-           </div>
-        </DashboardWidget>
+        {/* 5. REMOVED Battlefield Widget */}
 
         {/* 6. 年度关键质量问题闭环 */}
         <DashboardWidget 
-          title="关键质量问题闭环" 
+          title="关键质量问题闭环 (Quality)" 
           icon={<ShieldCheck className="w-4 h-4" />}
           onClick={() => setActiveDrillDown('quality')}
         >
@@ -767,39 +752,13 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
            </div>
         </DashboardWidget>
 
-        {/* 7. 产品大价值版本发布频率 + 复用度 */}
-        <DashboardWidget 
-          title="版本频率 & 平台复用" 
-          icon={<Repeat className="w-4 h-4" />}
-          onClick={() => setActiveDrillDown('version')}
-        >
-           <div className="grid grid-cols-2 gap-2 h-full">
-              <div className="bg-slate-50 rounded p-2 flex flex-col justify-center items-center text-center border border-slate-100 group-hover:bg-blue-50/20 transition-colors">
-                 <div className="text-xs text-slate-500 mb-1">大版本/年</div>
-                 <div className="text-2xl font-bold text-slate-800">{data.version.count}</div>
-                 <div className="text-[10px] text-green-600">达标</div>
-              </div>
-              <div className="bg-slate-50 rounded p-2 flex flex-col justify-center items-center text-center border border-slate-100 group-hover:bg-blue-50/20 transition-colors">
-                 <div className="text-xs text-slate-500 mb-1">中台复用度</div>
-                 <div className="text-2xl font-bold text-blue-700">{data.version.reuse}</div>
-                 <div className="text-[10px] text-slate-400">目标: 70%</div>
-              </div>
-              <div className="col-span-2 mt-auto">
-                 <div className="flex items-center justify-between text-[10px] text-slate-400 mb-1">
-                    <span>版本密度</span>
-                    <span className="text-blue-600">适中</span>
-                 </div>
-                 <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                    <div className="bg-blue-500 w-3/4 h-full rounded-full"></div>
-                 </div>
-              </div>
-           </div>
-        </DashboardWidget>
+        {/* 7. REMOVED Version Widget */}
 
-        {/* 8. 人力投资地图 */}
+        {/* 8. 人力投资地图 (Updated to span 2 cols) */}
         <DashboardWidget 
           title="人力资源投资地图" 
           icon={<Briefcase className="w-4 h-4" />}
+          className="xl:col-span-2"
           onClick={() => setActiveDrillDown('manpower')}
         >
           <div className="flex flex-col h-full justify-between">
@@ -971,12 +930,13 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             activeDrillDown === 'cycle' ? '开发周期分析' :
             activeDrillDown === 'roi' ? '研发投资回报明细' :
             activeDrillDown === 'battlefield' ? '战略战场突破详情' :
-            activeDrillDown === 'quality' ? '关键质量问题清单' :
+            activeDrillDown === 'quality' ? 'IPD项目质量度量看板' :
             activeDrillDown === 'version' ? '版本发布与复用统计' :
             activeDrillDown === 'manpower' ? '人力资源分布详情' : ''
           }
           isOpen={!!activeDrillDown} 
           onClose={() => setActiveDrillDown(null)}
+          widthClass={activeDrillDown === 'quality' ? 'max-w-full m-4' : 'max-w-7xl'}
         >
           {renderDrillDownContent()}
         </DrillDownModal>
