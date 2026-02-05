@@ -6,6 +6,7 @@ import { SystemMap } from './components/SystemMap';
 import { PortfolioDashboard } from './components/PortfolioDashboard';
 import { SystemLevelDashboard } from './components/SystemLevelDashboard';
 import { PersonalDashboard } from './components/PersonalDashboard';
+import { AIAssistant } from './components/AIAssistant';
 import { BarChart3, Map, Layers, LayoutDashboard, PieChart, Network, UserCircle } from 'lucide-react';
 import { MOCK_PROJECT } from './constants';
 
@@ -199,6 +200,10 @@ const App: React.FC = () => {
         {viewMode === 'personal-dashboard' && <PersonalDashboard />}
 
       </main>
+
+      {/* AI Assistant Floating Widget */}
+      <AIAssistant />
+
     </div>
   );
 };

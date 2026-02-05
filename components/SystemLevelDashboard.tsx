@@ -97,7 +97,7 @@ const SystemDrillDownModal: React.FC<{
         </div>
         
         {/* Only show default toolbar if NOT in quality view (quality has its own custom filter bar) and NOT in AI view */}
-        {!title.includes('质量') && !title.includes('AI Native') && (
+        {!title.includes('质量') && !title.includes('AI') && (
             <div className="px-4 py-2 bg-slate-50 border-b border-slate-100 flex gap-2">
             <div className="relative">
                 <Search className="w-4 h-4 absolute left-2 top-2 text-slate-400" />
@@ -123,6 +123,7 @@ const SystemDrillDownModal: React.FC<{
 export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSelectProductLine, systemId = 'security', onSelectSystem }) => {
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
   const [aiProjectDetail, setAiProjectDetail] = useState<string | null>(null);
+  const [aiAutomationDetail, setAiAutomationDetail] = useState(false);
 
   // --- Quality Filter State ---
   const [qualityFilters, setQualityFilters] = useState({
@@ -214,7 +215,7 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
   const renderDrillDownContent = () => {
       switch (activeDrillDown) {
           case 'ai_native': {
-            // SUB-VIEW: Detailed Phase Comparison
+            // SUB-VIEW 1: Detailed Phase Comparison (Existing)
             if (aiProjectDetail) {
                 // Mock Phase Data for illustration based on the selected project
                 // Added date ranges for better context
@@ -374,6 +375,133 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                 );
             }
 
+            // SUB-VIEW 2: AI Automation Detail (NEW)
+            if (aiAutomationDetail) {
+                const automationData = [
+                    { name: 'XDR 产品线', total: 5200, ai: 3120, trad: 2080, aiPass: 94.5, tradPass: 89.2, growth: 12 },
+                    { name: 'HCI 产品线', total: 6800, ai: 1700, trad: 5100, aiPass: 91.0, tradPass: 92.5, growth: 5 },
+                    { name: '天问 AI', total: 2400, ai: 2160, trad: 240, aiPass: 98.2, tradPass: 90.0, growth: 25 },
+                    { name: 'AC 产品线', total: 1400, ai: 130, trad: 1270, aiPass: 85.0, tradPass: 88.0, growth: 2 },
+                ];
+
+                return (
+                    <div className="space-y-6 animate-in slide-in-from-right duration-300">
+                        {/* Header */}
+                         <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+                            <button 
+                                onClick={() => setAiAutomationDetail(false)}
+                                className="p-2 hover:bg-slate-100 rounded-full transition-colors group"
+                            >
+                                <ArrowLeft className="w-5 h-5 text-slate-500 group-hover:text-violet-600" />
+                            </button>
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800">自动化测试效能详请 (Automation Details)</h3>
+                                <div className="text-sm text-slate-500 flex items-center gap-2">
+                                    <span>测试用例分布与执行分析</span>
+                                    <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                                    <span className="text-violet-600 font-medium">AI 生成用例通过率更高</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Summary Cards */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="bg-violet-50 rounded-xl p-5 border border-violet-100 relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="absolute right-0 top-0 w-32 h-32 bg-violet-200/20 rounded-full -mr-10 -mt-10"></div>
+                                <div className="flex items-center gap-3 mb-4 relative z-10">
+                                    <div className="p-2 bg-violet-200 rounded-lg text-violet-700">
+                                        <Bot className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-violet-900">AI 自动化 (AI Generated)</h4>
+                                        <div className="text-xs text-violet-600">Copilot / Agent 生成</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-end relative z-10">
+                                    <div>
+                                        <div className="text-3xl font-bold text-slate-800">7,110</div>
+                                        <div className="text-xs text-slate-500 mt-1">执行总数</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xl font-bold text-emerald-600">94.2%</div>
+                                        <div className="text-xs text-slate-500 mt-1">通过率 (Pass Rate)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <div className="bg-blue-50 rounded-xl p-5 border border-blue-100 relative overflow-hidden group hover:shadow-md transition-all">
+                                <div className="absolute right-0 top-0 w-32 h-32 bg-blue-200/20 rounded-full -mr-10 -mt-10"></div>
+                                <div className="flex items-center gap-3 mb-4 relative z-10">
+                                    <div className="p-2 bg-blue-200 rounded-lg text-blue-700">
+                                        <Code2 className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-blue-900">非 AI 自动化 (Traditional)</h4>
+                                        <div className="text-xs text-blue-600">手工编写脚本</div>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-end relative z-10">
+                                    <div>
+                                        <div className="text-3xl font-bold text-slate-800">8,690</div>
+                                        <div className="text-xs text-slate-500 mt-1">执行总数</div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-xl font-bold text-slate-600">89.5%</div>
+                                        <div className="text-xs text-slate-500 mt-1">通过率 (Pass Rate)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Breakdown Table */}
+                        <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                            <div className="px-5 py-3 border-b border-slate-100 bg-slate-50 font-bold text-slate-700 text-sm">
+                                产线/团队分布明细
+                            </div>
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-slate-50 text-slate-500 font-medium">
+                                    <tr>
+                                        <th className="p-4">产线名称</th>
+                                        <th className="p-4 text-right">总用例数</th>
+                                        <th className="p-4 w-48">构成比例 (AI vs Trad)</th>
+                                        <th className="p-4 text-center">AI 占比</th>
+                                        <th className="p-4 text-center">AI 用例通过率</th>
+                                        <th className="p-4 text-center">传统用例通过率</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {automationData.map((row, idx) => {
+                                        const aiPercent = Math.round((row.ai / row.total) * 100);
+                                        return (
+                                            <tr key={idx} className="hover:bg-slate-50">
+                                                <td className="p-4 font-bold text-slate-700">{row.name}</td>
+                                                <td className="p-4 text-right font-mono">{row.total.toLocaleString()}</td>
+                                                <td className="p-4">
+                                                    <div className="w-full h-2.5 bg-blue-200 rounded-full overflow-hidden flex">
+                                                        <div className="bg-violet-500 h-full" style={{width: `${aiPercent}%`}}></div>
+                                                    </div>
+                                                    <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+                                                        <span>AI: {row.ai}</span>
+                                                        <span>Trad: {row.trad}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-center font-bold text-violet-600">{aiPercent}%</td>
+                                                <td className="p-4 text-center">
+                                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${row.aiPass >= 90 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                                                        {row.aiPass}%
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-center text-slate-600">{row.tradPass}%</td>
+                                            </tr>
+                                        )
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="space-y-6">
                     {/* Layer 1: System Overview */}
@@ -385,7 +513,7 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                         <div className="relative z-10 grid grid-cols-4 gap-8">
                             {/* Metric 1 */}
                             <div className="flex flex-col gap-1">
-                                <span className="text-indigo-100 text-sm font-medium">全员 AI 渗透率 (Adoption)</span>
+                                <span className="text-indigo-100 text-sm font-medium">全员AI 覆盖率 (Adoption)</span>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-bold">78%</span>
                                     <span className="text-xs bg-white/20 px-2 py-0.5 rounded text-white flex items-center gap-1">
@@ -421,12 +549,29 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                 </div>
                             </div>
 
-                            {/* Metric 4 - Quality Impact */}
-                            <div className="flex flex-col gap-1 border-l border-white/10 pl-8">
-                                <span className="text-indigo-100 text-sm font-medium">AI 代码采纳率</span>
-                                <div className="text-3xl font-bold">35%</div>
-                                <span className="text-indigo-100 text-sm font-medium mt-2">AI 生成代码 Bug 率</span>
-                                <div className="text-xl font-bold text-emerald-300">0.05 <span className="text-xs font-normal text-indigo-200">/千行</span></div>
+                            {/* Metric 4 - Quality Impact (UPDATED) */}
+                            <div 
+                                className="flex flex-col gap-1 border-l border-white/10 pl-8 relative group cursor-pointer"
+                                onClick={() => setAiAutomationDetail(true)}
+                            >
+                                <div className="absolute inset-0 -m-2 bg-white/0 group-hover:bg-white/10 transition-colors rounded-lg"></div>
+                                <div className="relative z-10">
+                                     <div className="flex items-center gap-1">
+                                        <span className="text-indigo-100 text-sm font-medium">自动化案例数</span>
+                                        <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
+                                     </div>
+                                    <div className="flex items-baseline gap-2 mt-1">
+                                        <div className="text-3xl font-bold">15,800</div>
+                                    </div>
+                                    
+                                    <div className="flex items-center justify-between text-indigo-100 text-sm font-medium mt-3 mb-1">
+                                        <span>AI 自动化执行率</span>
+                                        <span className="text-emerald-300 font-bold">45%</span>
+                                    </div>
+                                    <div className="w-full bg-black/20 h-1.5 rounded-full overflow-hidden">
+                                        <div className="bg-emerald-400 h-full rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" style={{width: '45%'}}></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -532,8 +677,16 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                                                 </span>
                                                             </div>
                                                         </td>
+                                                        {/* Strategy Column - Updated */}
                                                         <td className="p-4">
-                                                            <span className={`text-xs px-2 py-0.5 rounded font-bold ${isClassA ? 'text-violet-700 bg-violet-100' : 'text-blue-700 bg-blue-100'}`}>Native (原生)</span>
+                                                            <div className="flex flex-col items-start">
+                                                                <span className={`text-xs px-2 py-0.5 rounded font-bold border ${isClassA ? 'text-violet-700 bg-violet-50 border-violet-200' : 'text-blue-700 bg-blue-50 border-blue-200'}`}>
+                                                                    {isClassA ? 'A类' : 'B类'}
+                                                                </span>
+                                                                <span className="text-[10px] text-slate-400 mt-0.5 scale-90 origin-left">
+                                                                    {isClassA ? '顶尖模型' : '自研CoStrict'}
+                                                                </span>
+                                                            </div>
                                                         </td>
                                                         
                                                         {/* E2E Efficiency with Dual Comparison - CLICKABLE */}

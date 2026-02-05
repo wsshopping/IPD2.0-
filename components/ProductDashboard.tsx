@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { PROJECTS_LIST } from '../constants';
-import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter, BrainCircuit, Cpu, Sparkles, AlertTriangle, Bug, FileCode, CheckCircle2, History, Microscope, Scale, GitBranch, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass } from 'lucide-react';
+import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter, BrainCircuit, Cpu, Sparkles, AlertTriangle, Bug, FileCode, CheckCircle2, History, Microscope, Scale, GitBranch, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, DollarSign, Activity } from 'lucide-react';
 import { Project } from '../types';
 
 interface ProductDashboardProps {
@@ -196,6 +197,223 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
   // Helper to render table content based on drill-down type
   const renderDrillDownContent = () => {
     switch (activeDrillDown) {
+      case 'value_realization':
+        return (
+            <div className="space-y-4">
+                <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 flex justify-between items-center">
+                    <div>
+                        <h4 className="font-bold text-slate-800">价值特性兑现分析表 (Value Analysis)</h4>
+                        <p className="text-xs text-slate-500 mt-1">关联项目: {filteredProjects[0]?.name || 'Current Project'}</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-2xl font-bold text-emerald-600">95%</span>
+                        <div className="text-xs text-slate-500">总体兑现率</div>
+                    </div>
+                </div>
+                <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
+                    <thead className="bg-slate-100 text-slate-700 font-medium">
+                        <tr>
+                            <th className="p-3">特性名称 (Epic/Feature)</th>
+                            <th className="p-3">商业目标 (Business Goal)</th>
+                            <th className="p-3 text-right">预估价值</th>
+                            <th className="p-3 text-right">实际价值</th>
+                            <th className="p-3 text-center">兑现状态</th>
+                            <th className="p-3">客户反馈</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        <tr>
+                            <td className="p-3 font-medium">多云统一纳管</td>
+                            <td className="p-3 text-xs text-slate-600">拓展金融行业客户，提升运营效率30%</td>
+                            <td className="p-3 text-right">¥ 500w</td>
+                            <td className="p-3 text-right">¥ 480w</td>
+                            <td className="p-3 text-center"><span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">已兑现</span></td>
+                            <td className="p-3 text-xs">某国有大行反馈良好</td>
+                        </tr>
+                        <tr>
+                            <td className="p-3 font-medium">AI 智能告警降噪</td>
+                            <td className="p-3 text-xs text-slate-600">减少运维人员 50% 告警处理量</td>
+                            <td className="p-3 text-right">¥ 300w</td>
+                            <td className="p-3 text-right">¥ 320w</td>
+                            <td className="p-3 text-center"><span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">超额兑现</span></td>
+                            <td className="p-3 text-xs">准确率超出预期</td>
+                        </tr>
+                        <tr>
+                            <td className="p-3 font-medium">边缘节点轻量化</td>
+                            <td className="p-3 text-xs text-slate-600">降低硬件成本 20%</td>
+                            <td className="p-3 text-right">¥ 200w</td>
+                            <td className="p-3 text-right">¥ 150w</td>
+                            <td className="p-3 text-center"><span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs">部分兑现</span></td>
+                            <td className="p-3 text-xs">兼容性有待提升</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        );
+      case 'online_issues':
+        return (
+            <div className="space-y-4">
+                <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-red-50 p-3 rounded border border-red-100">
+                        <div className="text-xs text-red-600 font-bold">致命问题 (S1)</div>
+                        <div className="text-2xl font-bold text-red-700">0</div>
+                    </div>
+                    <div className="bg-amber-50 p-3 rounded border border-amber-100">
+                        <div className="text-xs text-amber-600 font-bold">严重问题 (S2)</div>
+                        <div className="text-2xl font-bold text-amber-700">2</div>
+                    </div>
+                    <div className="bg-blue-50 p-3 rounded border border-blue-100">
+                        <div className="text-xs text-blue-600 font-bold">一般问题 (S3)</div>
+                        <div className="text-2xl font-bold text-blue-700">5</div>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded border border-slate-200">
+                        <div className="text-xs text-slate-600 font-bold">平均修复时长 (MTTR)</div>
+                        <div className="text-2xl font-bold text-slate-700">4.5h</div>
+                    </div>
+                </div>
+                <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
+                    <thead className="bg-slate-100 text-slate-700 font-medium">
+                        <tr>
+                            <th className="p-3">问题单号</th>
+                            <th className="p-3">级别</th>
+                            <th className="p-3">问题描述</th>
+                            <th className="p-3">发生时间</th>
+                            <th className="p-3">根因归类</th>
+                            <th className="p-3">状态</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        <tr>
+                            <td className="p-3 font-mono text-blue-600 hover:underline cursor-pointer">ISSUE-202401</td>
+                            <td className="p-3"><span className="text-amber-600 font-bold text-xs">S2</span></td>
+                            <td className="p-3 text-slate-700">部分区域监控数据延迟上报 > 5min</td>
+                            <td className="p-3 text-xs text-slate-500">2024-02-10 14:30</td>
+                            <td className="p-3 text-xs">代码逻辑缺陷 (死锁)</td>
+                            <td className="p-3"><span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">已解决</span></td>
+                        </tr>
+                        <tr>
+                            <td className="p-3 font-mono text-blue-600 hover:underline cursor-pointer">ISSUE-202403</td>
+                            <td className="p-3"><span className="text-blue-600 font-bold text-xs">S3</span></td>
+                            <td className="p-3 text-slate-700">导出报表中文乱码</td>
+                            <td className="p-3 text-xs text-slate-500">2024-02-12 09:15</td>
+                            <td className="p-3 text-xs">配置问题</td>
+                            <td className="p-3"><span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">已解决</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        );
+      case 'project_cycle':
+        return (
+            <div className="space-y-4">
+                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <h4 className="font-bold text-blue-900 flex items-center gap-2">
+                        <Clock className="w-4 h-4" /> 分阶段周期偏差分析 (Phase Variance)
+                    </h4>
+                    <p className="text-xs text-blue-700 mt-1">项目整体开发周期缩短 3 天，主要得益于 TR4 测试阶段自动化率提升。</p>
+                </div>
+                <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
+                    <thead className="bg-slate-100 text-slate-700 font-medium">
+                        <tr>
+                            <th className="p-3">阶段 (Phase)</th>
+                            <th className="p-3 text-right">计划天数 (Planned)</th>
+                            <th className="p-3 text-right">实际天数 (Actual)</th>
+                            <th className="p-3 text-center">偏差 (Variance)</th>
+                            <th className="p-3">原因分析</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        <tr>
+                            <td className="p-3 font-medium">DCP1 ~ TR1 (概念)</td>
+                            <td className="p-3 text-right">15</td>
+                            <td className="p-3 text-right">15</td>
+                            <td className="p-3 text-center text-slate-400">0</td>
+                            <td className="p-3 text-xs text-slate-500">正常</td>
+                        </tr>
+                        <tr>
+                            <td className="p-3 font-medium">TR1 ~ TR2 (计划)</td>
+                            <td className="p-3 text-right">20</td>
+                            <td className="p-3 text-right">22</td>
+                            <td className="p-3 text-center text-red-600 font-bold">+2</td>
+                            <td className="p-3 text-xs text-slate-500">需求评审多次迭代</td>
+                        </tr>
+                        <tr>
+                            <td className="p-3 font-medium">TR2 ~ TR4 (开发)</td>
+                            <td className="p-3 text-right">60</td>
+                            <td className="p-3 text-right">58</td>
+                            <td className="p-3 text-center text-emerald-600 font-bold">-2</td>
+                            <td className="p-3 text-xs text-slate-500">AI 代码助手提效</td>
+                        </tr>
+                        <tr>
+                            <td className="p-3 font-medium">TR4 ~ TR6 (验证)</td>
+                            <td className="p-3 text-right">30</td>
+                            <td className="p-3 text-right">27</td>
+                            <td className="p-3 text-center text-emerald-600 font-bold">-3</td>
+                            <td className="p-3 text-xs text-slate-500">自动化回归覆盖率高</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        );
+      case 'delivery_quality':
+        return (
+            <div className="space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="p-4 bg-emerald-50 rounded-lg border border-emerald-100 text-center">
+                        <div className="text-xs text-emerald-600 font-bold mb-1">交付评分</div>
+                        <div className="text-3xl font-bold text-emerald-700">98</div>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg border border-slate-200 text-center">
+                        <div className="text-xs text-slate-500 font-bold mb-1">测试用例覆盖率</div>
+                        <div className="text-xl font-bold text-slate-800">92%</div>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg border border-slate-200 text-center">
+                        <div className="text-xs text-slate-500 font-bold mb-1">静态扫描问题</div>
+                        <div className="text-xl font-bold text-slate-800">0.02 <span className="text-xs font-normal">/kloc</span></div>
+                    </div>
+                    <div className="p-4 bg-white rounded-lg border border-slate-200 text-center">
+                        <div className="text-xs text-slate-500 font-bold mb-1">安全漏洞 (High)</div>
+                        <div className="text-xl font-bold text-emerald-600">0</div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 font-bold text-sm text-slate-700">
+                        质量门禁检查项 (Quality Gate Checklist)
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                        <div className="p-3 flex items-center justify-between hover:bg-slate-50">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                <span className="text-sm font-medium text-slate-700">所有 P0/P1 缺陷已关闭</span>
+                            </div>
+                            <span className="text-xs text-slate-400">Pass</span>
+                        </div>
+                        <div className="p-3 flex items-center justify-between hover:bg-slate-50">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                <span className="text-sm font-medium text-slate-700">遗留缺陷 DI 值 &lt; 5</span>
+                            </div>
+                            <span className="text-xs text-slate-400">Pass (2.5)</span>
+                        </div>
+                        <div className="p-3 flex items-center justify-between hover:bg-slate-50">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                <span className="text-sm font-medium text-slate-700">性能基线测试通过</span>
+                            </div>
+                            <span className="text-xs text-slate-400">Pass</span>
+                        </div>
+                        <div className="p-3 flex items-center justify-between hover:bg-slate-50">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                                <span className="text-sm font-medium text-slate-700">安全红线扫描无阻断项</span>
+                            </div>
+                            <span className="text-xs text-slate-400">Pass</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
       case 'competitiveness':
         return (
           <table className="w-full text-left text-sm bg-white rounded-lg border border-slate-200">
@@ -827,7 +1045,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                 
                 {/* Grouped Headers */}
                 <th colSpan={2} className="px-4 py-2 border-r border-b border-slate-200 text-center bg-blue-50/50">人力投入</th>
-                <th colSpan={5} className="px-4 py-2 border-b border-slate-200 text-center bg-yellow-50/50">运营结果</th>
+                <th colSpan={5} className="px-4 py-2 border-b border-slate-200 text-center bg-yellow-50/50">运营结果 (Operational Results)</th>
                 <th rowSpan={2} className="px-4 py-3 w-10"></th>
               </tr>
               
@@ -839,7 +1057,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                 <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">价值兑现</th>
                 <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">网上问题</th>
                 <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">开发周期</th>
-                <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">交付质量</th>
+                <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">产品上架交付周期</th>
                 <th className="px-3 py-2 text-center text-slate-500 bg-yellow-50/30 font-medium">人力偏差</th>
               </tr>
             </thead>
@@ -896,12 +1114,44 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                     <td className="px-3 py-3 text-center border-r border-slate-100">{proj.headcount}</td>
                     <td className="px-3 py-3 text-center border-r border-slate-100 text-slate-500">{proj.headcountPercentage}%</td>
 
-                    {/* Operational Results */}
-                    {/* Using resultMetrics index 0,1,2,3 for simplicity based on mock data structure */}
-                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono font-medium">{proj.resultMetrics[0].value}</td>
-                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono text-red-600">{proj.resultMetrics[1].value}</td>
-                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono">{proj.resultMetrics[2].value}</td>
-                    <td className="px-3 py-3 text-center border-r border-slate-100 font-mono text-emerald-600">{proj.resultMetrics[3].value}</td>
+                    {/* Operational Results (CLICKABLE DRILL-DOWN) */}
+                    
+                    {/* 1. Value Realization */}
+                    <td 
+                      className="px-3 py-3 text-center border-r border-slate-100 font-mono font-medium hover:bg-yellow-50 cursor-pointer text-blue-600 underline decoration-dashed underline-offset-2"
+                      onClick={(e) => { e.stopPropagation(); setActiveDrillDown('value_realization'); }}
+                      title="点击查看价值兑现详情"
+                    >
+                      {proj.resultMetrics[0].value}
+                    </td>
+
+                    {/* 2. Online Issues */}
+                    <td 
+                      className="px-3 py-3 text-center border-r border-slate-100 font-mono text-red-600 hover:bg-red-50 cursor-pointer underline decoration-dashed underline-offset-2"
+                      onClick={(e) => { e.stopPropagation(); setActiveDrillDown('online_issues'); }}
+                      title="点击查看网上问题详情"
+                    >
+                      {proj.resultMetrics[1].value}
+                    </td>
+
+                    {/* 3. Development Cycle */}
+                    <td 
+                      className="px-3 py-3 text-center border-r border-slate-100 font-mono hover:bg-blue-50 cursor-pointer text-blue-600 underline decoration-dashed underline-offset-2"
+                      onClick={(e) => { e.stopPropagation(); setActiveDrillDown('project_cycle'); }}
+                      title="点击查看周期偏差分析"
+                    >
+                      {proj.resultMetrics[2].value}
+                    </td>
+
+                    {/* 4. Delivery Quality */}
+                    <td 
+                      className="px-3 py-3 text-center border-r border-slate-100 font-mono text-emerald-600 hover:bg-emerald-50 cursor-pointer underline decoration-dashed underline-offset-2"
+                      onClick={(e) => { e.stopPropagation(); setActiveDrillDown('delivery_quality'); }}
+                      title="点击查看产品上架交付周期详情"
+                    >
+                      {proj.resultMetrics[3].value}
+                    </td>
+
                     <td className={`px-3 py-3 text-center font-mono ${proj.manpowerDeviation?.startsWith('-') ? 'text-emerald-600' : 'text-amber-600'}`}>
                       {proj.manpowerDeviation}
                     </td>
@@ -932,11 +1182,22 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             activeDrillDown === 'battlefield' ? '战略战场突破详情' :
             activeDrillDown === 'quality' ? 'IPD项目质量度量看板' :
             activeDrillDown === 'version' ? '版本发布与复用统计' :
-            activeDrillDown === 'manpower' ? '人力资源分布详情' : ''
+            activeDrillDown === 'manpower' ? '人力资源分布详情' : 
+            activeDrillDown === 'value_realization' ? '项目价值兑现详情' :
+            activeDrillDown === 'online_issues' ? '项目网上问题分析' :
+            activeDrillDown === 'project_cycle' ? '项目开发周期偏差' :
+            activeDrillDown === 'delivery_quality' ? '产品上架交付周期报告' : ''
           }
           isOpen={!!activeDrillDown} 
           onClose={() => setActiveDrillDown(null)}
-          widthClass={activeDrillDown === 'quality' ? 'max-w-full m-4' : 'max-w-7xl'}
+          widthClass={
+            activeDrillDown === 'quality' || 
+            activeDrillDown === 'value_realization' ||
+            activeDrillDown === 'online_issues' ||
+            activeDrillDown === 'project_cycle' ||
+            activeDrillDown === 'delivery_quality'
+            ? 'max-w-full m-4' : 'max-w-7xl'
+          }
         >
           {renderDrillDownContent()}
         </DrillDownModal>
