@@ -5,7 +5,8 @@ import { ProjectDetail } from './components/ProjectDetail';
 import { SystemMap } from './components/SystemMap';
 import { PortfolioDashboard } from './components/PortfolioDashboard';
 import { SystemLevelDashboard } from './components/SystemLevelDashboard';
-import { BarChart3, Map, Layers, LayoutDashboard, PieChart, Network } from 'lucide-react';
+import { PersonalDashboard } from './components/PersonalDashboard';
+import { BarChart3, Map, Layers, LayoutDashboard, PieChart, Network, UserCircle } from 'lucide-react';
 import { MOCK_PROJECT } from './constants';
 
 const App: React.FC = () => {
@@ -112,6 +113,16 @@ const App: React.FC = () => {
               <Map className="w-4 h-4" />
               参考架构
             </button>
+            <button
+              onClick={() => setViewMode('personal-dashboard')}
+              className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap
+                ${viewMode === 'personal-dashboard' 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <UserCircle className="w-4 h-4" />
+              个人工作台
+            </button>
           </nav>
         </div>
       </header>
@@ -149,6 +160,7 @@ const App: React.FC = () => {
                   </>
              )}
              {viewMode === 'system-map' && <span>参考架构 (Reference Architecture)</span>}
+             {viewMode === 'personal-dashboard' && <span>个人工作台 (Personal Workbench)</span>}
            </h2>
         </div>
 
@@ -183,6 +195,8 @@ const App: React.FC = () => {
             onBack={handleBack} 
           />
         )}
+
+        {viewMode === 'personal-dashboard' && <PersonalDashboard />}
 
       </main>
     </div>
