@@ -1057,7 +1057,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                 <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">价值兑现</th>
                 <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">网上问题</th>
                 <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">开发周期</th>
-                <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">产品上架交付周期</th>
+                <th className="px-3 py-2 border-r border-slate-200 text-center text-slate-500 bg-yellow-50/30 font-medium">交付质量</th>
                 <th className="px-3 py-2 text-center text-slate-500 bg-yellow-50/30 font-medium">人力偏差</th>
               </tr>
             </thead>
@@ -1147,7 +1147,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                     <td 
                       className="px-3 py-3 text-center border-r border-slate-100 font-mono text-emerald-600 hover:bg-emerald-50 cursor-pointer underline decoration-dashed underline-offset-2"
                       onClick={(e) => { e.stopPropagation(); setActiveDrillDown('delivery_quality'); }}
-                      title="点击查看产品上架交付周期详情"
+                      title="点击查看交付质量详情"
                     >
                       {proj.resultMetrics[3].value}
                     </td>
@@ -1186,7 +1186,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             activeDrillDown === 'value_realization' ? '项目价值兑现详情' :
             activeDrillDown === 'online_issues' ? '项目网上问题分析' :
             activeDrillDown === 'project_cycle' ? '项目开发周期偏差' :
-            activeDrillDown === 'delivery_quality' ? '产品上架交付周期报告' : ''
+            activeDrillDown === 'delivery_quality' ? '项目交付质量报告' : ''
           }
           isOpen={!!activeDrillDown} 
           onClose={() => setActiveDrillDown(null)}
