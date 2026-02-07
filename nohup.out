@@ -1,0 +1,29 @@
+
+> ipd-决策指挥平台@0.0.0 dev
+> vite
+
+
+  VITE v6.4.1  ready in 418 ms
+
+  ➜  Local:   http://localhost:33000/
+  ➜  Network: http://10.0.39.2:33000/
+  ➜  Network: http://172.20.0.1:33000/
+  ➜  Network: http://172.17.0.1:33000/
+  ➜  Network: http://172.19.0.1:33000/
+
+> ipd-决策指挥平台@0.0.0 dev
+> vite
+
+
+  VITE v6.4.1  ready in 305 ms
+
+  ➜  Local:   http://localhost:33000/
+  ➜  Network: http://10.0.39.2:33000/
+  ➜  Network: http://172.20.0.1:33000/
+  ➜  Network: http://172.17.0.1:33000/
+  ➜  Network: http://172.19.0.1:33000/
+9:46:12 AM [vite] (client) hmr update /components/SystemLevelDashboard.tsx
+9:46:26 AM [vite] (client) hmr update /components/PortfolioDashboard.tsx
+10:05:41 AM [vite] (client) hmr update /components/PortfolioDashboard.tsx, /components/ProductDashboard.tsx, /components/SystemLevelDashboard.tsx
+10:05:54 AM [vite] (client) hmr update /components/PortfolioDashboard.tsx
+10:06:04 AM [vite] (client) hmr update /components/ProductDashboard.tsx

@@ -1,12 +1,14 @@
 
-import React, { useState } from 'react';
-import { PROJECTS_LIST } from '../constants';
+import React, { useEffect, useState } from 'react';
+import { PROJECTS_LIST, ROSTER } from '../constants';
 import { ChevronRight, LayoutGrid, List, TrendingUp, TrendingDown, Target, Zap, Users, ShieldCheck, Repeat, Clock, Briefcase, PieChart, X, Search, Filter, BrainCircuit, Cpu, Sparkles, AlertTriangle, Bug, FileCode, CheckCircle2, History, Microscope, Scale, GitBranch, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, DollarSign, Activity } from 'lucide-react';
 import { Project } from '../types';
 
 interface ProductDashboardProps {
   onSelectProject: (project: Project) => void;
   productLineName?: string;
+  initialDrillDown?: string | null;
+  onInitialDrillDownConsumed?: () => void;
 }
 
 // 1. Define Dynamic Data for different product lines
@@ -173,8 +175,24 @@ const DrillDownModal: React.FC<{
   );
 };
 
-export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProject, productLineName = 'XDR 产品线' }) => {
+export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProject, productLineName = 'XDR 产品线', initialDrillDown = null, onInitialDrillDownConsumed }) => {
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
+  const [selectedRosterTeam, setSelectedRosterTeam] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialDrillDown) {
+      setActiveDrillDown(initialDrillDown);
+      onInitialDrillDownConsumed?.();
+    }
+  }, [initialDrillDown, onInitialDrillDownConsumed]);
+
+  useEffect(() => {
+    if (activeDrillDown !== 'manpower') return;
+    const teams = Array.from(new Set(
+      ROSTER.filter(member => member.productLine === productLineName).map(member => member.team)
+    ));
+    setSelectedRosterTeam(prev => (prev && teams.includes(prev)) ? prev : (teams[0] ?? null));
+  }, [activeDrillDown, productLineName]);
 
   // 2. Extract keyword and get dynamic data
   const getFilterKeyword = (name: string) => {
@@ -286,7 +304,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                         <tr>
                             <td className="p-3 font-mono text-blue-600 hover:underline cursor-pointer">ISSUE-202401</td>
                             <td className="p-3"><span className="text-amber-600 font-bold text-xs">S2</span></td>
-                            <td className="p-3 text-slate-700">部分区域监控数据延迟上报 > 5min</td>
+                            <td className="p-3 text-slate-700">部分区域监控数据延迟上报 &gt; 5min</td>
                             <td className="p-3 text-xs text-slate-500">2024-02-10 14:30</td>
                             <td className="p-3 text-xs">代码逻辑缺陷 (死锁)</td>
                             <td className="p-3"><span className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs">已解决</span></td>
@@ -637,7 +655,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                            {filteredProjects.map(p => (
                                <tr key={p.id} className="hover:bg-slate-50">
                                    <td className="p-3 pl-4 font-medium text-slate-700">{p.name}</td>
-                                   <td className="p-3 text-xs text-slate-500">TR4</td>
+                                   <td className="p-3 text-xs text-slate-500">{p.phase || 'TR4'}</td>
                                    <td className="p-3 font-mono">23</td>
                                    <td className="p-3 text-center">
                                        <span className={`px-2 py-0.5 rounded text-xs ${p.status === 'normal' ? 'bg-green-100 text-green-700' : p.status === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
@@ -653,69 +671,135 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
          );
       case 'manpower':
          const aiStats = data.manpower.aiStats || { total: 0, algo: 0, eng: 0, native: 0 };
+         const roster = ROSTER.filter(member => member.productLine === productLineName);
+         const functionOrder = ['研发', '测试', '规划', '安全运营', '技术支持'] as const;
+         const levelOrder = [4, 5, 6, 7, 8, 9, 10];
+         const employmentOrder = ['正式员工', '合作方'] as const;
+         const teams = Array.from(new Set(roster.map(member => member.team)));
+         const activeTeam = selectedRosterTeam && teams.includes(selectedRosterTeam)
+           ? selectedRosterTeam
+           : (teams[0] ?? null);
+         const activeTeamRoster = activeTeam ? roster.filter(member => member.team === activeTeam) : [];
+         const totalRoster = roster.length;
+         const functionCounts = functionOrder.map(fn => ({
+           label: fn,
+           count: roster.filter(member => member.function === fn).length
+         }));
+         const levelCounts = levelOrder.map(level => ({
+           label: `${level}级`,
+           count: roster.filter(member => member.level === level).length
+         }));
+         const employmentCounts = employmentOrder.map(type => ({
+           label: type,
+           count: roster.filter(member => member.employment === type).length
+         }));
+         const aiPenetration = data.manpower.total ? Math.round((aiStats.total / data.manpower.total) * 100) : 0;
+         const teamSummary = teams.map(team => {
+            const members = roster.filter(member => member.team === team);
+            const functionCounts = functionOrder.map(fn => ({
+              fn,
+              count: members.filter(member => member.function === fn).length
+            }));
+            return { team, members, functionCounts };
+         });
          return (
            <div className="space-y-6">
-             {/* AI Talent Breakdown Section */}
-             <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100 rounded-xl p-5 relative overflow-hidden">
-                <div className="flex items-center gap-2 mb-4 relative z-10">
-                    <div className="p-1.5 bg-blue-100 rounded text-blue-600">
-                       <BrainCircuit className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-bold text-slate-800">AI 人才结构透视 (AI Talent Structure)</h4>
-                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold ml-2">
-                        渗透率 {Math.round((aiStats.total / data.manpower.total) * 100)}%
-                    </span>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
-                    {/* Total AI */}
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-blue-100/50">
-                        <span className="text-xs text-slate-500 mb-1">AI 专职人才总数</span>
-                        <div className="flex items-baseline gap-2">
-                           <span className="text-2xl font-bold text-slate-800">{aiStats.total}</span>
-                           <span className="text-xs font-normal text-slate-400">人</span>
-                        </div>
-                    </div>
-                    
-                    {/* Algorithm Breakdown */}
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-indigo-100/50 hover:bg-white/80 transition-colors">
-                        <div className="flex items-center gap-2 mb-2">
-                            <BrainCircuit className="w-4 h-4 text-indigo-500" />
-                            <span className="text-xs font-bold text-slate-600">AI 算法 (Algorithm)</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-slate-800">{aiStats.algo}</span>
-                            <span className="text-xs text-slate-400">{aiStats.total > 0 ? Math.round((aiStats.algo/aiStats.total)*100) : 0}%</span>
-                        </div>
-                    </div>
-
-                    {/* Engineering Breakdown */}
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-cyan-100/50 hover:bg-white/80 transition-colors">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Cpu className="w-4 h-4 text-cyan-600" />
-                            <span className="text-xs font-bold text-slate-600">AI 工程 (Engineering)</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-slate-800">{aiStats.eng}</span>
-                            <span className="text-xs text-slate-400">{aiStats.total > 0 ? Math.round((aiStats.eng/aiStats.total)*100) : 0}%</span>
-                        </div>
-                    </div>
-
-                    {/* AI Native Breakdown */}
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-purple-100/50 hover:bg-white/80 transition-colors">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="w-4 h-4 text-purple-600" />
-                            <span className="text-xs font-bold text-slate-600">AI Native (原生应用)</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-slate-800">{aiStats.native}</span>
-                            <span className="text-xs text-slate-400">{aiStats.total > 0 ? Math.round((aiStats.native/aiStats.total)*100) : 0}%</span>
-                        </div>
-                    </div>
+             {/* Team Talent Structure Overview */}
+             <div className="bg-white border border-slate-200 rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-4 h-4 text-slate-500" />
+                    <h4 className="font-bold text-slate-700 text-sm">团队人才结构透视</h4>
+                    <span className="text-[11px] text-slate-400">样本 {totalRoster} 人</span>
                 </div>
 
-                {/* Visual Decoration */}
-                <div className="absolute right-0 top-0 w-32 h-32 bg-blue-200/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                {totalRoster === 0 ? (
+                  <div className="text-sm text-slate-500">暂无人员数据</div>
+                ) : (
+                  <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                        <div className="text-xs font-bold text-slate-600 mb-2">职能占比</div>
+                        <div className="space-y-2">
+                          {functionCounts.map(item => {
+                            const pct = Math.round((item.count / totalRoster) * 100);
+                            return (
+                              <div key={item.label} className="flex items-center gap-2 text-xs">
+                                <span className="w-12 text-slate-500">{item.label}</span>
+                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className="h-full bg-blue-500" style={{ width: `${pct}%` }}></div>
+                                </div>
+                                <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                        <div className="text-xs font-bold text-slate-600 mb-2">职级分布</div>
+                        <div className="space-y-2">
+                          {levelCounts.map(item => {
+                            const pct = Math.round((item.count / totalRoster) * 100);
+                            return (
+                              <div key={item.label} className="flex items-center gap-2 text-xs">
+                                <span className="w-12 text-slate-500">{item.label}</span>
+                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className="h-full bg-indigo-500" style={{ width: `${pct}%` }}></div>
+                                </div>
+                                <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                        <div className="text-xs font-bold text-slate-600 mb-2">用工类型</div>
+                        <div className="space-y-2">
+                          {employmentCounts.map(item => {
+                            const pct = Math.round((item.count / totalRoster) * 100);
+                            return (
+                              <div key={item.label} className="flex items-center gap-2 text-xs">
+                                <span className="w-16 text-slate-500">{item.label}</span>
+                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                  <div className="h-full bg-emerald-500" style={{ width: `${pct}%` }}></div>
+                                </div>
+                                <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-100 rounded-lg p-4 relative overflow-hidden">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="w-4 h-4 text-blue-600" />
+                        <div className="text-xs font-bold text-slate-700">AI 子集</div>
+                        <span className="ml-auto text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">
+                          渗透率 {aiPenetration}%
+                        </span>
+                      </div>
+                      <div className="text-2xl font-bold text-slate-800">{aiStats.total} <span className="text-xs font-normal text-slate-400">人</span></div>
+                      <div className="grid grid-cols-3 gap-2 mt-3">
+                        {[
+                          { label: '算法', value: aiStats.algo, color: 'text-indigo-600' },
+                          { label: '工程', value: aiStats.eng, color: 'text-cyan-600' },
+                          { label: '原生', value: aiStats.native, color: 'text-purple-600' }
+                        ].map((item) => (
+                          <div key={item.label} className="bg-white/70 border border-white/60 rounded-lg p-2">
+                            <div className="text-[10px] text-slate-500">{item.label}</div>
+                            <div className={`text-sm font-bold ${item.color}`}>{item.value}</div>
+                            <div className="text-[10px] text-slate-400">
+                              {aiStats.total ? Math.round((item.value / aiStats.total) * 100) : 0}%
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="absolute right-0 top-0 w-20 h-20 bg-blue-200/30 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none"></div>
+                    </div>
+                  </div>
+                )}
              </div>
 
              {/* Existing Table */}
@@ -753,6 +837,120 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
                  </tr>
               </tbody>
             </table>
+
+            {/* Team Roster */}
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden mt-6">
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-slate-500" />
+                  <h4 className="font-bold text-slate-700 text-sm">团队花名册</h4>
+                </div>
+                <span className="text-[11px] text-slate-400">点击团队查看人员列表</span>
+              </div>
+
+              {roster.length === 0 ? (
+                <div className="p-4 text-sm text-slate-500">暂无人员数据</div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3">
+                  <div className="border-b lg:border-b-0 lg:border-r border-slate-100">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-white text-slate-500 font-medium">
+                        <tr>
+                          <th className="p-3">团队</th>
+                          <th className="p-3 text-right">人数</th>
+                          <th className="p-3">职能构成</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {teamSummary.map((team) => (
+                          <tr
+                            key={team.team}
+                            onClick={() => setSelectedRosterTeam(team.team)}
+                            className={`cursor-pointer transition-colors ${
+                              activeTeam === team.team ? 'bg-blue-50/60' : 'hover:bg-slate-50'
+                            }`}
+                          >
+                            <td className="p-3 font-medium text-slate-700">{team.team}</td>
+                            <td className="p-3 text-right font-mono text-slate-700">{team.members.length}</td>
+                            <td className="p-3">
+                              <div className="flex flex-wrap gap-1">
+                                {team.functionCounts.filter(item => item.count > 0).map(item => (
+                                  <span
+                                    key={item.fn}
+                                    className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px]"
+                                  >
+                                    {item.fn} {item.count}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="lg:col-span-2">
+                    <div className="px-4 py-3 border-b border-slate-100 bg-white flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-bold text-slate-800">{activeTeam || '人员列表'}</div>
+                        <div className="text-[11px] text-slate-400">
+                          {activeTeam ? `成员 ${activeTeamRoster.length} 人` : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead className="bg-slate-50 text-slate-500 font-medium">
+                          <tr>
+                            <th className="p-3">工号</th>
+                            <th className="p-3">姓名</th>
+                            <th className="p-3">职能</th>
+                            <th className="p-3">职级</th>
+                            <th className="p-3">用工类型</th>
+                            <th className="p-3">角色</th>
+                            <th className="p-3">投入方向</th>
+                            <th className="p-3">关键项目</th>
+                            <th className="p-3 text-right">项目数</th>
+                            <th className="p-3">项目</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {activeTeamRoster.map(member => (
+                            <tr key={member.id} className="hover:bg-slate-50">
+                              <td className="p-3 font-mono text-slate-700">{member.id}</td>
+                              <td className="p-3 font-medium text-slate-700">{member.name}</td>
+                              <td className="p-3 text-slate-600">{member.function}</td>
+                              <td className="p-3 text-slate-600">{member.level}级</td>
+                              <td className="p-3">
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                                  member.employment === '正式员工'
+                                    ? 'bg-emerald-50 text-emerald-600'
+                                    : 'bg-amber-50 text-amber-600'
+                                }`}>
+                                  {member.employment}
+                                </span>
+                              </td>
+                              <td className="p-3 text-slate-600">{member.role}</td>
+                              <td className="p-3 text-slate-600">{member.direction}</td>
+                              <td className="p-3">
+                                {member.keyProject ? (
+                                  <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 text-[10px] font-medium">是</span>
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px]">否</span>
+                                )}
+                              </td>
+                              <td className="p-3 text-right text-slate-700">{member.projects.length}</td>
+                              <td className="p-3 text-slate-500">{member.projects.join('、')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
            </div>
          );
        case 'version':

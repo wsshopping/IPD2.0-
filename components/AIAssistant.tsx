@@ -4,7 +4,7 @@ import { Sparkles, Send, X, Bot, User, Loader2, MessageSquare, GripHorizontal } 
 
 // 上下文数据：让 AI 知道它是一个度量系统的助手
 const SYSTEM_INSTRUCTION = `
-你是一个专业的 IPD (集成产品开发) 度量分析助手。
+你是一个专业的 IPD (集成产品开发) AI分析助手。
 你正在服务于 "IPD 度量指挥中心" 系统。
 
 以下是当前的系统关键数据概览，请基于此回答用户问题：
@@ -51,18 +51,32 @@ export const AIAssistant: React.FC = () => {
     {
       id: 'welcome',
       role: 'model',
-      text: '你好！我是 IPD 度量分析助手。我可以为您解读项目风险、质量趋势或人力投入情况。请问有什么可以帮您？',
+      text: '你好！我是 IPD AI分析助手。我可以为您解读项目风险、质量趋势或人力投入情况。请问有什么可以帮您？',
       timestamp: new Date()
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Feedback State
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [feedbackText, setFeedbackText] = useState('');
+  const [feedbackContact, setFeedbackContact] = useState('');
+  const [feedbackStatus, setFeedbackStatus] = useState<'idle' | 'error' | 'success'>('idle');
+
   // Dragging State
   const [position, setPosition] = useState<{x: number, y: number} | null>(null);
   const windowRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const dragOffset = useRef({ x: 0, y: 0 });
+
+  // Floating Button Dragging State
+  const [floatingPos, setFloatingPos] = useState<{x: number, y: number} | null>(null);
+  const floatRef = useRef<HTMLDivElement>(null);
+  const isFloatDragging = useRef(false);
+  const floatOffset = useRef({ x: 0, y: 0 });
+  const floatSize = useRef({ width: 0, height: 0 });
+  const suppressToggle = useRef(false);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -109,6 +123,60 @@ export const AIAssistant: React.FC = () => {
        isDragging.current = false;
        // Release capture
        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    }
+  };
+
+  const clamp = (value: number, min: number, max: number) => {
+    return Math.min(Math.max(value, min), max);
+  };
+
+  const handleFloatPointerDown = (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (floatRef.current) {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+      isFloatDragging.current = true;
+      suppressToggle.current = false;
+
+      const rect = floatRef.current.getBoundingClientRect();
+      floatSize.current = { width: rect.width, height: rect.height };
+      floatOffset.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+
+      if (!floatingPos) {
+        setFloatingPos({ x: rect.left, y: rect.top });
+      }
+    }
+  };
+
+  const handleFloatPointerMove = (e: React.PointerEvent) => {
+    if (isFloatDragging.current) {
+      e.preventDefault();
+      const newX = e.clientX - floatOffset.current.x;
+      const newY = e.clientY - floatOffset.current.y;
+
+      if (Math.abs(newX - (floatingPos?.x ?? newX)) > 4 || Math.abs(newY - (floatingPos?.y ?? newY)) > 4) {
+        suppressToggle.current = true;
+      }
+
+      const padding = 8;
+      const maxX = window.innerWidth - floatSize.current.width - padding;
+      const maxY = window.innerHeight - floatSize.current.height - padding;
+      setFloatingPos({
+        x: clamp(newX, padding, Math.max(padding, maxX)),
+        y: clamp(newY, padding, Math.max(padding, maxY))
+      });
+    }
+  };
+
+  const handleFloatPointerUp = (e: React.PointerEvent) => {
+    if (isFloatDragging.current) {
+      e.preventDefault();
+      isFloatDragging.current = false;
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     }
   };
 
@@ -175,6 +243,17 @@ export const AIAssistant: React.FC = () => {
     }
   };
 
+  const handleSubmitFeedback = () => {
+    if (!feedbackText.trim()) {
+      setFeedbackStatus('error');
+      return;
+    }
+    setFeedbackStatus('success');
+    setFeedbackText('');
+    setFeedbackContact('');
+    setTimeout(() => setFeedbackStatus('idle'), 2000);
+  };
+
   return (
     <>
       {/* Draggable Chat Window */}
@@ -201,7 +280,7 @@ export const AIAssistant: React.FC = () => {
                 <Bot className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm">度量分析助手</h3>
+                <h3 className="font-bold text-sm">AI分析助手</h3>
                 <div className="flex items-center gap-1 text-[10px] text-blue-100 opacity-90">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
                   Gemini 2.5 Flash Online
@@ -279,19 +358,88 @@ export const AIAssistant: React.FC = () => {
             <div className="text-[10px] text-center text-slate-400 mt-2">
               AI 内容由 Gemini 生成，仅供参考。
             </div>
+
+            {/* Feedback */}
+            <div className="mt-3 border-t border-slate-100 pt-3">
+              <button
+                onClick={() => setIsFeedbackOpen(!isFeedbackOpen)}
+                className="w-full text-xs text-slate-600 hover:text-slate-800 transition-colors flex items-center justify-between"
+              >
+                <span>问题反馈 / 建议</span>
+                <span className="text-slate-400">{isFeedbackOpen ? '收起' : '展开'}</span>
+              </button>
+              {isFeedbackOpen && (
+                <div className="mt-2 space-y-2">
+                  <textarea
+                    value={feedbackText}
+                    onChange={(e) => {
+                      setFeedbackText(e.target.value);
+                      if (feedbackStatus !== 'idle') setFeedbackStatus('idle');
+                    }}
+                    rows={3}
+                    placeholder="请描述你遇到的问题或建议（必填）"
+                    className="w-full bg-slate-100 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all resize-none"
+                  />
+                  <input
+                    type="text"
+                    value={feedbackContact}
+                    onChange={(e) => setFeedbackContact(e.target.value)}
+                    placeholder="联系方式（可选，如邮箱/手机号）"
+                    className="w-full bg-slate-100 border border-slate-200 text-slate-700 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all"
+                  />
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400">
+                      {feedbackStatus === 'error' && '请先填写反馈内容'}
+                      {feedbackStatus === 'success' && '已收到，感谢反馈'}
+                      {feedbackStatus === 'idle' && '我们会尽快处理你的反馈'}
+                    </span>
+                    <button
+                      onClick={handleSubmitFeedback}
+                      className="text-xs bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                    >
+                      提交
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
         </div>
       )}
 
-      {/* Floating Toggle Button (Always Fixed) */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* Floating Toggle Button (Draggable) */}
+      <div
+        ref={floatRef}
+        style={
+          floatingPos 
+            ? { left: `${floatingPos.x}px`, top: `${floatingPos.y}px`, bottom: 'auto', right: 'auto' }
+            : { bottom: '24px', right: '24px' }
+        }
+        className="fixed z-40"
+      >
         <button
-            onClick={() => setIsOpen(!isOpen)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-4 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all hover:scale-110 active:scale-95 group relative"
+            onPointerDown={handleFloatPointerDown}
+            onPointerMove={handleFloatPointerMove}
+            onPointerUp={handleFloatPointerUp}
+            onClick={() => {
+              if (suppressToggle.current) {
+                suppressToggle.current = false;
+                return;
+              }
+              setIsOpen(!isOpen);
+            }}
+            className="relative text-white p-4 rounded-full transition-all hover:scale-110 active:scale-95 group
+              bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700
+              shadow-[0_10px_30px_rgba(8,145,178,0.35)] ring-1 ring-cyan-300/60"
         >
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
-            {isOpen ? <X className="w-6 h-6" /> : <MessageSquare className="w-6 h-6" />}
+            {/* Outer glow */}
+            <span className="absolute inset-0 rounded-full blur-md bg-cyan-400/30 group-hover:bg-cyan-300/40 -z-10"></span>
+            {/* Antenna dot */}
+            <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-cyan-200 shadow-[0_0_8px_rgba(34,211,238,0.9)] animate-pulse"></span>
+            {/* Inner ring */}
+            <span className="absolute inset-1 rounded-full border border-white/15"></span>
+            {isOpen ? <X className="w-6 h-6" /> : <Bot className="w-6 h-6" />}
         </button>
       </div>
 

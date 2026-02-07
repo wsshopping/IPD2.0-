@@ -15,21 +15,26 @@ const App: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [selectedSystem, setSelectedSystem] = useState<string>('security'); // 'security' | 'cloud' | 'platform'
   const [selectedProductLine, setSelectedProductLine] = useState<{id: string, name: string} | null>(null);
+  const [productDrillDown, setProductDrillDown] = useState<string | null>(null);
+  const [systemDrillDown, setSystemDrillDown] = useState<string | null>(null);
 
   const handleSelectProject = (project: Project) => {
     setSelectedProject(project);
     setViewMode('project-detail');
   };
 
-  const handleSelectSystem = (systemId: string) => {
+  const handleSelectSystem = (systemId: string, options?: { openDrillDown?: string }) => {
     setSelectedSystem(systemId);
     setViewMode('system-dashboard');
+    setSystemDrillDown(options?.openDrillDown ?? null);
   }
 
-  const handleSelectProductLine = (id: string, name: string) => {
+  const handleSelectProductLine = (id: string, name: string, options?: { openDrillDown?: string }) => {
     setSelectedProductLine({ id, name });
     setViewMode('product-dashboard');
+    setProductDrillDown(options?.openDrillDown ?? null);
   };
+
 
   const handleBack = () => {
      setSelectedProject(null);
@@ -178,6 +183,8 @@ const App: React.FC = () => {
              systemId={selectedSystem}
              onSelectSystem={handleSelectSystem}
              onSelectProductLine={handleSelectProductLine} 
+             initialDrillDown={systemDrillDown}
+             onInitialDrillDownConsumed={() => setSystemDrillDown(null)}
           />
         )}
 
@@ -187,6 +194,8 @@ const App: React.FC = () => {
           <ProductDashboard 
             onSelectProject={handleSelectProject} 
             productLineName={selectedProductLine?.name}
+            initialDrillDown={productDrillDown}
+            onInitialDrillDownConsumed={() => setProductDrillDown(null)}
           />
         )}
 

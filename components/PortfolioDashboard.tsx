@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { TrendingUp, TrendingDown, Briefcase, LayoutGrid, Activity, ThumbsUp, Trophy, ArrowRight, ChevronRight, X, Search, Filter, CheckCircle2, AlertTriangle, AlertCircle, Flag, BrainCircuit, Cpu, Sparkles } from 'lucide-react';
-import { PROJECTS_LIST } from '../constants';
+import { TrendingUp, TrendingDown, Briefcase, LayoutGrid, Activity, ThumbsUp, Trophy, ArrowRight, ChevronRight, X, Search, Filter, CheckCircle2, AlertTriangle, AlertCircle, Flag, Sparkles, Users } from 'lucide-react';
+import { PROJECTS_LIST, ROSTER } from '../constants';
 import { Project } from '../types';
 
 interface PortfolioDashboardProps {
   onSelectProject: (project: Project) => void;
-  onSelectSystem?: (systemId: string) => void;
+  onSelectSystem?: (systemId: string, options?: { openDrillDown?: string }) => void;
 }
 
 // Reusable Widget Container
@@ -78,7 +78,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
 
   const isHilltopProject = (project: Project) => {
-      // Mock logic
+      if (typeof project.isHilltop === 'boolean') return project.isHilltop;
       return project.id === 'PRJ-2024-001' || project.id === 'PRJ-2024-002';
   };
 
@@ -116,12 +116,15 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                      </td>
                      <td className="p-4 text-slate-600">{project.projectSet}</td>
                      <td className="p-4">
-                        {project.progress > 80 ? 
-                            <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs">上市发布 (DCP5)</span> :
-                         project.progress > 50 ? 
-                            <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">验证 (TR5)</span> :
-                            <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">开发 (TR4)</span>
-                        }
+                        {project.phase ? (
+                          <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">{project.phase}</span>
+                        ) : (
+                          project.progress > 80 ? 
+                              <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs">上市发布 (DCP5)</span> :
+                           project.progress > 50 ? 
+                              <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">验证 (TR5)</span> :
+                              <span className="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs">开发 (TR4)</span>
+                        )}
                      </td>
                      <td className="p-4">
                         {project.status === 'normal' && <span className="flex items-center gap-1 text-green-600 font-bold"><CheckCircle2 className="w-4 h-4"/> 正常</span>}
@@ -142,6 +145,22 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
        }
        case 'manpower': {
          const groupAiStats = { total: 850, algo: 350, eng: 400, native: 100 };
+         const totalRoster = ROSTER.length;
+         const functionOrder = ['研发', '测试', '规划', '安全运营', '技术支持'] as const;
+         const levelOrder = [4, 5, 6, 7, 8, 9, 10];
+         const employmentOrder = ['正式员工', '合作方'] as const;
+         const functionCounts = functionOrder.map(fn => ({
+           label: fn,
+           count: ROSTER.filter(member => member.function === fn).length
+         }));
+         const levelCounts = levelOrder.map(level => ({
+           label: `${level}级`,
+           count: ROSTER.filter(member => member.level === level).length
+         }));
+         const employmentCounts = employmentOrder.map(type => ({
+           label: type,
+           count: ROSTER.filter(member => member.employment === type).length
+         }));
          return (
           <div className="space-y-6 p-4">
             <div className="grid grid-cols-4 gap-4">
@@ -163,60 +182,100 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                </div>
             </div>
 
-             <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-xl p-5 relative overflow-hidden">
-                <div className="flex items-center gap-2 mb-4 relative z-10">
-                    <div className="p-1.5 bg-violet-100 rounded text-violet-600">
-                       <BrainCircuit className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-bold text-slate-800">集团 AI 人才战略透视 (Group AI Talent Structure)</h4>
-                    <span className="bg-violet-100 text-violet-700 text-xs px-2 py-0.5 rounded-full font-bold ml-2">
-                        渗透率 28%
-                    </span>
+             <div className="bg-white border border-slate-200 rounded-xl p-5">
+                <div className="flex items-center gap-2 mb-4">
+                    <Users className="w-4 h-4 text-slate-500" />
+                    <h4 className="font-bold text-slate-700 text-sm">集团人才结构透视</h4>
+                    <span className="text-[11px] text-slate-400">样本 {totalRoster} 人</span>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-violet-100/50">
-                        <span className="text-xs text-slate-500 mb-1">AI 专职人才总数</span>
-                        <div className="flex items-baseline gap-2">
-                           <span className="text-2xl font-bold text-slate-800">{groupAiStats.total}</span>
-                           <span className="text-xs font-normal text-slate-400">人</span>
-                        </div>
-                    </div>
-                    
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-indigo-100/50 hover:bg-white/80 transition-colors">
-                        <div className="flex items-center gap-2 mb-2">
-                            <BrainCircuit className="w-4 h-4 text-indigo-500" />
-                            <span className="text-xs font-bold text-slate-600">AI 算法 (Algorithm)</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-slate-800">{groupAiStats.algo}</span>
-                            <span className="text-xs text-slate-400">{Math.round((groupAiStats.algo/groupAiStats.total)*100)}%</span>
-                        </div>
-                    </div>
+                {totalRoster === 0 ? (
+                    <div className="text-sm text-slate-500">暂无人员数据</div>
+                ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                                <div className="text-xs font-bold text-slate-600 mb-2">职能占比</div>
+                                <div className="space-y-2">
+                                    {functionCounts.map(item => {
+                                        const pct = Math.round((item.count / totalRoster) * 100);
+                                        return (
+                                            <div key={item.label} className="flex items-center gap-2 text-xs">
+                                                <span className="w-12 text-slate-500">{item.label}</span>
+                                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-indigo-500" style={{ width: `${pct}%` }}></div>
+                                                </div>
+                                                <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
 
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-cyan-100/50 hover:bg-white/80 transition-colors">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Cpu className="w-4 h-4 text-cyan-600" />
-                            <span className="text-xs font-bold text-slate-600">AI 工程 (Engineering)</span>
-                        </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-slate-800">{groupAiStats.eng}</span>
-                            <span className="text-xs text-slate-400">{Math.round((groupAiStats.eng/groupAiStats.total)*100)}%</span>
-                        </div>
-                    </div>
+                            <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                                <div className="text-xs font-bold text-slate-600 mb-2">职级分布</div>
+                                <div className="space-y-2">
+                                    {levelCounts.map(item => {
+                                        const pct = Math.round((item.count / totalRoster) * 100);
+                                        return (
+                                            <div key={item.label} className="flex items-center gap-2 text-xs">
+                                                <span className="w-12 text-slate-500">{item.label}</span>
+                                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-blue-500" style={{ width: `${pct}%` }}></div>
+                                                </div>
+                                                <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
 
-                    <div className="flex flex-col p-4 bg-white/60 rounded-lg border border-purple-100/50 hover:bg-white/80 transition-colors">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="w-4 h-4 text-purple-600" />
-                            <span className="text-xs font-bold text-slate-600">AI Native (原生应用)</span>
+                            <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                                <div className="text-xs font-bold text-slate-600 mb-2">用工类型</div>
+                                <div className="space-y-2">
+                                    {employmentCounts.map(item => {
+                                        const pct = Math.round((item.count / totalRoster) * 100);
+                                        return (
+                                            <div key={item.label} className="flex items-center gap-2 text-xs">
+                                                <span className="w-16 text-slate-500">{item.label}</span>
+                                                <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-emerald-500" style={{ width: `${pct}%` }}></div>
+                                                </div>
+                                                <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-slate-800">{groupAiStats.native}</span>
-                            <span className="text-xs text-slate-400">{Math.round((groupAiStats.native/groupAiStats.total)*100)}%</span>
+
+                        <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-lg p-4 relative overflow-hidden">
+                            <div className="flex items-center gap-2 mb-3">
+                                <Sparkles className="w-4 h-4 text-violet-600" />
+                                <div className="text-xs font-bold text-slate-700">AI 子集</div>
+                                <span className="ml-auto text-[10px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-bold">
+                                    渗透率 28%
+                                </span>
+                            </div>
+                            <div className="text-2xl font-bold text-slate-800">{groupAiStats.total} <span className="text-xs font-normal text-slate-400">人</span></div>
+                            <div className="grid grid-cols-3 gap-2 mt-3">
+                                {[
+                                  { label: '算法', value: groupAiStats.algo, color: 'text-indigo-600' },
+                                  { label: '工程', value: groupAiStats.eng, color: 'text-cyan-600' },
+                                  { label: '原生', value: groupAiStats.native, color: 'text-purple-600' }
+                                ].map((item) => (
+                                    <div key={item.label} className="bg-white/70 border border-white/60 rounded-lg p-2">
+                                        <div className="text-[10px] text-slate-500">{item.label}</div>
+                                        <div className={`text-sm font-bold ${item.color}`}>{item.value}</div>
+                                        <div className="text-[10px] text-slate-400">
+                                            {Math.round((item.value / groupAiStats.total) * 100)}%
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="absolute right-0 top-0 w-24 h-24 bg-violet-200/30 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none"></div>
                         </div>
                     </div>
-                </div>
-                <div className="absolute right-0 top-0 w-48 h-48 bg-violet-200/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+                )}
              </div>
 
             <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -232,7 +291,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 bg-white">
-                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('security')}>
+                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('security', { openDrillDown: 'manpower' })}>
                       <td className="p-4 font-bold text-indigo-700">大安全 (Big Security)</td>
                       <td className="p-4 text-right text-slate-600">1,200</td>
                       <td className="p-4 text-right font-bold text-slate-800">1,180</td>
@@ -240,7 +299,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                       <td className="p-4 text-xs text-slate-500">XDR 3.0, 保护AI</td>
                       <td className="p-4 text-right font-mono">24.5</td>
                     </tr>
-                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('cloud')}>
+                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('cloud', { openDrillDown: 'manpower' })}>
                       <td className="p-4 font-bold text-blue-600">大云 (Big Cloud)</td>
                       <td className="p-4 text-right text-slate-600">800</td>
                       <td className="p-4 text-right font-bold text-slate-800">790</td>
@@ -248,7 +307,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                       <td className="p-4 text-xs text-slate-500">托管云, HCI 市场下沉</td>
                       <td className="p-4 text-right font-mono">21.2</td>
                     </tr>
-                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('platform')}>
+                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('platform', { openDrillDown: 'manpower' })}>
                       <td className="p-4 font-bold text-emerald-600">研发平台 (Platform)</td>
                       <td className="p-4 text-right text-slate-600">450</td>
                       <td className="p-4 text-right font-bold text-slate-800">410</td>
@@ -256,7 +315,7 @@ export const PortfolioDashboard: React.FC<PortfolioDashboardProps> = ({ onSelect
                       <td className="p-4 text-xs text-slate-500">天问大模型, 效能工具</td>
                       <td className="p-4 text-right font-mono">28.0</td>
                     </tr>
-                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('aibg')}>
+                    <tr className="hover:bg-blue-50 cursor-pointer" onClick={() => onSelectSystem && onSelectSystem('aibg', { openDrillDown: 'manpower' })}>
                       <td className="p-4 font-bold text-violet-600">AI 体系 (AI BG) <span className="text-[10px] text-white bg-red-500 px-1 rounded ml-1">New</span></td>
                       <td className="p-4 text-right text-slate-600">600</td>
                       <td className="p-4 text-right font-bold text-slate-800">600</td>

@@ -1,10 +1,13 @@
-import React, { useState, useMemo } from 'react';
-import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, ArrowLeft, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, List, ChevronDown, RefreshCw, Sparkles, Workflow, Bot, Terminal, TrendingDown, Calendar } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, ArrowLeft, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, ChevronDown, RefreshCw, Sparkles, Workflow, Bot, Terminal, TrendingDown, Calendar } from 'lucide-react';
+import { ROSTER } from '../constants';
 
 interface SystemLevelDashboardProps {
-  onSelectProductLine: (id: string, name: string) => void;
+  onSelectProductLine: (id: string, name: string, options?: { openDrillDown?: string }) => void;
   systemId?: string; // 'security' | 'cloud' | 'platform' | 'aibg'
-  onSelectSystem?: (id: string) => void;
+  onSelectSystem?: (id: string, options?: { openDrillDown?: string }) => void;
+  initialDrillDown?: string | null;
+  onInitialDrillDownConsumed?: () => void;
 }
 
 // --- Data Types for Quality Module ---
@@ -120,7 +123,7 @@ const SystemDrillDownModal: React.FC<{
   );
 };
 
-export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSelectProductLine, systemId = 'security', onSelectSystem }) => {
+export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSelectProductLine, systemId = 'security', onSelectSystem, initialDrillDown = null, onInitialDrillDownConsumed }) => {
   const [activeDrillDown, setActiveDrillDown] = useState<string | null>(null);
   const [aiProjectDetail, setAiProjectDetail] = useState<string | null>(null);
   const [aiAutomationDetail, setAiAutomationDetail] = useState(false);
@@ -204,6 +207,13 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
   };
 
   const currentSystemData = systemData[systemId as keyof typeof systemData] || systemData.security;
+
+  useEffect(() => {
+    if (initialDrillDown) {
+      setActiveDrillDown(initialDrillDown);
+      onInitialDrillDownConsumed?.();
+    }
+  }, [initialDrillDown, onInitialDrillDownConsumed]);
 
   // Helper icons
   const StarIcon = ({ className }: { className: string }) => (
@@ -845,6 +855,30 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                const algoRatio = systemId === 'aibg' ? 0.7 : (systemId === 'platform' ? 0.6 : 0.35); // AI BG has high researcher ratio
                const algoCount = Math.floor(totalAi * algoRatio);
                const engCount = totalAi - algoCount;
+               const systemRosterNameMap = {
+                 security: '大安全',
+                 cloud: '大云',
+                 platform: '研发平台',
+                 aibg: 'AI 体系'
+               } as const;
+               const rosterKey = systemRosterNameMap[systemId as keyof typeof systemRosterNameMap] || '大安全';
+               const roster = ROSTER.filter(member => member.system === rosterKey);
+               const totalRoster = roster.length;
+               const functionOrder = ['研发', '测试', '规划', '安全运营', '技术支持'] as const;
+               const levelOrder = [4, 5, 6, 7, 8, 9, 10];
+               const employmentOrder = ['正式员工', '合作方'] as const;
+               const functionCounts = functionOrder.map(fn => ({
+                 label: fn,
+                 count: roster.filter(member => member.function === fn).length
+               }));
+               const levelCounts = levelOrder.map(level => ({
+                 label: `${level}级`,
+                 count: roster.filter(member => member.level === level).length
+               }));
+               const employmentCounts = employmentOrder.map(type => ({
+                 label: type,
+                 count: roster.filter(member => member.employment === type).length
+               }));
 
               return (
                 <div className="space-y-6 p-4">
@@ -868,81 +902,138 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                         </div>
                     </div>
 
-                    {/* AI Talent Structure (New Section) */}
-                    <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-xl p-5 relative overflow-hidden">
-                        <div className="flex items-center gap-2 mb-4 relative z-10">
-                            <BrainCircuit className="w-5 h-5 text-violet-600" />
-                            <h4 className="font-bold text-slate-800">AI 人才结构透视 (AI Talent Structure)</h4>
-                            <span className="bg-violet-100 text-violet-700 text-xs px-2 py-0.5 rounded-full font-bold ml-2">
-                                渗透率 {Math.round(aiRatio * 100)}%
-                            </span>
+                    {/* Team Talent Structure Overview */}
+                    <div className="bg-white border border-slate-200 rounded-xl p-5">
+                        <div className="flex items-center gap-2 mb-4">
+                            <Users className="w-4 h-4 text-slate-500" />
+                            <h4 className="font-bold text-slate-700 text-sm">团队人才结构透视</h4>
+                            <span className="text-[11px] text-slate-400">样本 {totalRoster} 人</span>
                         </div>
-                        
-                        <div className="grid grid-cols-3 gap-6 relative z-10">
-                            {/* Total AI */}
-                            <div className="flex flex-col">
-                                <span className="text-xs text-slate-500 mb-1">AI 专职人才总数</span>
-                                <span className="text-2xl font-bold text-slate-800">{totalAi} <span className="text-xs font-normal text-slate-400">人</span></span>
-                            </div>
-                            
-                            {/* Algorithm Breakdown */}
-                            <div className="flex items-center gap-3 bg-white/60 p-3 rounded-lg border border-violet-100/50">
-                                <div className="p-2 bg-violet-100 text-violet-600 rounded-lg">
-                                    <BrainCircuit className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <div className="text-xs text-slate-500 font-medium">AI 算法 (Algorithm)</div>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-lg font-bold text-slate-800">{algoCount}</span>
-                                        <span className="text-xs text-slate-400">占比 {Math.round((algoCount/totalAi)*100)}%</span>
+                        {totalRoster === 0 ? (
+                            <div className="text-sm text-slate-500">暂无人员数据</div>
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                                <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                                        <div className="text-xs font-bold text-slate-600 mb-2">职能占比</div>
+                                        <div className="space-y-2">
+                                            {functionCounts.map(item => {
+                                                const pct = Math.round((item.count / totalRoster) * 100);
+                                                return (
+                                                    <div key={item.label} className="flex items-center gap-2 text-xs">
+                                                        <span className="w-12 text-slate-500">{item.label}</span>
+                                                        <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-indigo-500" style={{ width: `${pct}%` }}></div>
+                                                        </div>
+                                                        <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                    <div className="text-[10px] text-slate-400 mt-0.5">模型训练 / 算法研究</div>
-                                </div>
-                            </div>
 
-                            {/* Engineering Breakdown */}
-                            <div className="flex items-center gap-3 bg-white/60 p-3 rounded-lg border border-blue-100/50">
-                                <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                                    <Cpu className="w-4 h-4" />
-                                </div>
-                                <div>
-                                    <div className="text-xs text-slate-500 font-medium">AI 工程 (Engineering)</div>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-lg font-bold text-slate-800">{engCount}</span>
-                                        <span className="text-xs text-slate-400">占比 {Math.round((engCount/totalAi)*100)}%</span>
+                                    <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                                        <div className="text-xs font-bold text-slate-600 mb-2">职级分布</div>
+                                        <div className="space-y-2">
+                                            {levelCounts.map(item => {
+                                                const pct = Math.round((item.count / totalRoster) * 100);
+                                                return (
+                                                    <div key={item.label} className="flex items-center gap-2 text-xs">
+                                                        <span className="w-12 text-slate-500">{item.label}</span>
+                                                        <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-blue-500" style={{ width: `${pct}%` }}></div>
+                                                        </div>
+                                                        <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
-                                    <div className="text-[10px] text-slate-400 mt-0.5">MLOps / 推理优化 / 平台</div>
+
+                                    <div className="bg-slate-50/70 border border-slate-100 rounded-lg p-3">
+                                        <div className="text-xs font-bold text-slate-600 mb-2">用工类型</div>
+                                        <div className="space-y-2">
+                                            {employmentCounts.map(item => {
+                                                const pct = Math.round((item.count / totalRoster) * 100);
+                                                return (
+                                                    <div key={item.label} className="flex items-center gap-2 text-xs">
+                                                        <span className="w-16 text-slate-500">{item.label}</span>
+                                                        <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                                            <div className="h-full bg-emerald-500" style={{ width: `${pct}%` }}></div>
+                                                        </div>
+                                                        <span className="w-12 text-right text-slate-600">{item.count} ({pct}%)</span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-lg p-4 relative overflow-hidden">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <Sparkles className="w-4 h-4 text-violet-600" />
+                                        <div className="text-xs font-bold text-slate-700">AI 子集</div>
+                                        <span className="ml-auto text-[10px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-bold">
+                                            渗透率 {Math.round(aiRatio * 100)}%
+                                        </span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-slate-800">{totalAi} <span className="text-xs font-normal text-slate-400">人</span></div>
+                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                        {[
+                                          { label: '算法', value: algoCount, color: 'text-violet-600' },
+                                          { label: '工程', value: engCount, color: 'text-blue-600' }
+                                        ].map((item) => (
+                                            <div key={item.label} className="bg-white/70 border border-white/60 rounded-lg p-2">
+                                                <div className="text-[10px] text-slate-500">{item.label}</div>
+                                                <div className={`text-sm font-bold ${item.color}`}>{item.value}</div>
+                                                <div className="text-[10px] text-slate-400">
+                                                    {totalAi ? Math.round((item.value / totalAi) * 100) : 0}%
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="absolute right-0 top-0 w-20 h-20 bg-violet-200/30 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none"></div>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Visual Decoration */}
-                        <div className="absolute right-0 top-0 w-32 h-32 bg-violet-200/20 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                        )}
                     </div>
 
                     {/* Department Table */}
-                    <table className="w-full text-left text-sm border border-slate-200 rounded-lg overflow-hidden">
-                        <thead className="bg-slate-50 text-slate-500 font-medium sticky top-0 z-10">
-                            <tr>
-                                <th className="p-4">产线/部门名称</th>
-                                <th className="p-4 text-right">编制 (HC)</th>
-                                <th className="p-4 text-right">占比</th>
-                                <th className="p-4 text-right">饱和度</th>
-                                <th className="p-4">投入重心</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100 bg-white">
-                            {currentSystemData.lines.map((line, idx) => (
-                                <tr key={idx}>
-                                    <td className="p-4 font-bold text-slate-700">{line.name}</td>
-                                    <td className="p-4 text-right text-slate-600">{line.headcount}</td>
-                                    <td className="p-4 text-right text-slate-600">{Math.round((line.headcount / currentSystemData.headcount) * 100)}%</td>
-                                    <td className="p-4 text-right"><span className="text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">98%</span></td>
-                                    <td className="p-4 text-xs text-slate-500">{line.focus}</td>
+                    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                        <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+                            <h4 className="font-bold text-slate-700 text-sm">产线人力分布明细</h4>
+                            <span className="text-[11px] text-slate-400">点击产线直接下钻</span>
+                        </div>
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-white text-slate-500 font-medium sticky top-0 z-10">
+                                <tr>
+                                    <th className="p-4">产线/部门名称</th>
+                                    <th className="p-4 text-right">编制 (HC)</th>
+                                    <th className="p-4 text-right">占比</th>
+                                    <th className="p-4 text-right">饱和度</th>
+                                    <th className="p-4">投入重心</th>
+                                    <th className="p-4 w-10"></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 bg-white">
+                                {currentSystemData.lines.map((line, idx) => (
+                                    <tr 
+                                      key={idx}
+                                      onClick={() => onSelectProductLine(line.id, line.name, { openDrillDown: 'manpower' })}
+                                      className="cursor-pointer transition-colors hover:bg-slate-50"
+                                      title="点击进入产线人力分布"
+                                    >
+                                        <td className="p-4 font-bold text-slate-700">{line.name}</td>
+                                        <td className="p-4 text-right text-slate-600">{line.headcount}</td>
+                                        <td className="p-4 text-right text-slate-600">{Math.round((line.headcount / currentSystemData.headcount) * 100)}%</td>
+                                        <td className="p-4 text-right"><span className="text-green-600 bg-green-50 px-2 py-0.5 rounded text-xs">98%</span></td>
+                                        <td className="p-4 text-xs text-slate-500">{line.focus}</td>
+                                        <td className="p-4 text-slate-300"><ChevronRight className="w-4 h-4" /></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
               );
             }
