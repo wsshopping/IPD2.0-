@@ -42,6 +42,12 @@ const DASHBOARD_MOCK_DATA: Record<string, any> = {
       total: 350, 
       growth: '65%',
       aiStats: { total: 65, algo: 15, eng: 30, native: 20 }
+    },
+    aiNative: {
+      adoption: 78,
+      silicon: 46,
+      savedPersonDays: 3200,
+      automation: { autoShare: 62, aiExec: 45, aiFirstPass: 94 }
     }
   },
   'HCI': {
@@ -72,6 +78,12 @@ const DASHBOARD_MOCK_DATA: Record<string, any> = {
       total: 350, 
       growth: '40%',
       aiStats: { total: 25, algo: 5, eng: 15, native: 5 }
+    },
+    aiNative: {
+      adoption: 66,
+      silicon: 38,
+      savedPersonDays: 2100,
+      automation: { autoShare: 55, aiExec: 36, aiFirstPass: 92 }
     }
   },
   'DEFAULT': {
@@ -99,6 +111,12 @@ const DASHBOARD_MOCK_DATA: Record<string, any> = {
       total: 200, 
       growth: '50%',
       aiStats: { total: 40, algo: 10, eng: 20, native: 10 }
+    },
+    aiNative: {
+      adoption: 60,
+      silicon: 35,
+      savedPersonDays: 1800,
+      automation: { autoShare: 50, aiExec: 32, aiFirstPass: 90 }
     }
   }
 };
@@ -211,10 +229,135 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
     ? PROJECTS_LIST.filter(p => p.projectSet?.includes(filterKeyword))
     : PROJECTS_LIST;
 
+  const clamp = (val: number, min: number, max: number) => Math.max(min, Math.min(max, val));
+  const aiNative = data.aiNative || {
+    adoption: 60,
+    silicon: 35,
+    savedPersonDays: 1800,
+    automation: { autoShare: 50, aiExec: 32, aiFirstPass: 90 }
+  };
+
+  const getAiProjectRows = (projects: Project[]) => {
+    const baseReduction = clamp(Math.round((aiNative.adoption + aiNative.silicon) / 5), 12, 32);
+    return projects.map((project, idx) => {
+      const baselineDays = 120 - idx * 8;
+      const actualDays = clamp(baselineDays - baseReduction - idx * 3, 60, baselineDays);
+      const efficiency = Math.round(((baselineDays - actualDays) / baselineDays) * 100);
+      return { name: project.name, baselineDays, actualDays, efficiency };
+    });
+  };
+
 
   // Helper to render table content based on drill-down type
   const renderDrillDownContent = () => {
     switch (activeDrillDown) {
+      case 'ai_native': {
+        const projectRows = getAiProjectRows(filteredProjects.slice(0, 4));
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-xs text-slate-500 mb-2">人员覆盖率</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-3xl font-bold text-slate-800">{aiNative.adoption}%</div>
+                  <span className="text-xs text-slate-400">近30天</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-violet-500 h-full rounded-full" style={{ width: `${aiNative.adoption}%` }}></div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-xs text-slate-500 mb-2">硅基含量（代码覆盖）</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-3xl font-bold text-slate-800">{aiNative.silicon}%</div>
+                  <span className="text-xs text-slate-400">近30天</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${aiNative.silicon}%` }}></div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-xs text-slate-500 mb-2">节省人日（估算）</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-3xl font-bold text-slate-800">{aiNative.savedPersonDays.toLocaleString()}</div>
+                  <span className="text-xs text-slate-400">人日</span>
+                </div>
+                <div className="text-[11px] text-slate-400 mt-3">
+                  说明：基于计划基线与 AI 模式预测周期估算
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-xs text-slate-500 mb-2">自动化案例占比</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-2xl font-bold text-slate-800">{aiNative.automation.autoShare}%</div>
+                  <span className="text-xs text-slate-400">近30天</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-sky-500 h-full rounded-full" style={{ width: `${aiNative.automation.autoShare}%` }}></div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-xs text-slate-500 mb-2">AI 自动化执行占比</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-2xl font-bold text-slate-800">{aiNative.automation.aiExec}%</div>
+                  <span className="text-xs text-slate-400">近30天</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${aiNative.automation.aiExec}%` }}></div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl border border-slate-200 p-4">
+                <div className="text-xs text-slate-500 mb-2">AI 自动化首通率</div>
+                <div className="flex items-baseline gap-2">
+                  <div className="text-2xl font-bold text-slate-800">{aiNative.automation.aiFirstPass}%</div>
+                  <span className="text-xs text-slate-400">近30天</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-violet-500 h-full rounded-full" style={{ width: `${aiNative.automation.aiFirstPass}%` }}></div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <div className="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <h4 className="font-bold text-slate-700 text-sm">AI Native 项目周期对比</h4>
+                <span className="text-xs text-slate-400">单位：天</span>
+              </div>
+              <table className="w-full text-left text-sm">
+                <thead className="bg-white text-slate-500 font-medium border-b border-slate-200">
+                  <tr>
+                    <th className="p-4">项目</th>
+                    <th className="p-4 text-right">基线周期</th>
+                    <th className="p-4 text-right">AI 周期</th>
+                    <th className="p-4 text-right">提效</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {projectRows.length > 0 ? (
+                    projectRows.map((row, idx) => (
+                      <tr key={`${row.name}-${idx}`} className="hover:bg-slate-50">
+                        <td className="p-4 font-medium text-slate-700">{row.name}</td>
+                        <td className="p-4 text-right font-mono text-slate-600">{row.baselineDays}</td>
+                        <td className="p-4 text-right font-mono text-slate-600">{row.actualDays}</td>
+                        <td className="p-4 text-right">
+                          <span className="text-emerald-600 font-bold">{row.efficiency}%</span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="p-6 text-center text-slate-400">暂无项目数据</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+      }
       case 'value_realization':
         return (
             <div className="space-y-4">
@@ -1113,6 +1256,35 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
            </div>
         </DashboardWidget>
 
+        {/* 4. AI Native Efficiency */}
+        <DashboardWidget 
+          title="AI Native 效能" 
+          icon={<Sparkles className="w-4 h-4" />}
+          className="border-violet-200 hover:border-violet-300"
+          onClick={() => setActiveDrillDown('ai_native')}
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-slate-800">{aiNative.adoption}%</span>
+              <span className="text-xs text-slate-500">人员覆盖率</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-500 w-14">硅基含量</span>
+              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-violet-500 rounded-full" style={{ width: `${aiNative.silicon}%` }}></div>
+              </div>
+              <span className="font-bold text-slate-600">{aiNative.silicon}%</span>
+            </div>
+            <div className="flex items-center justify-between text-xs text-slate-500">
+              <span>节省人日（估算）</span>
+              <span className="font-bold text-slate-700">{aiNative.savedPersonDays.toLocaleString()} 人日</span>
+            </div>
+            <div className="text-[10px] text-slate-400">
+              自动化：案例占比 {aiNative.automation.autoShare}% · AI执行 {aiNative.automation.aiExec}% · 首通 {aiNative.automation.aiFirstPass}%
+            </div>
+          </div>
+        </DashboardWidget>
+
         {/* 4. 产品研发投资回报率 (ROI) */}
         <DashboardWidget 
           title="研发投资回报率 (ROI)" 
@@ -1378,6 +1550,7 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             activeDrillDown === 'cycle' ? '开发周期分析' :
             activeDrillDown === 'roi' ? '研发投资回报明细' :
             activeDrillDown === 'battlefield' ? '战略战场突破详情' :
+            activeDrillDown === 'ai_native' ? 'AI Native 效能分析' :
             activeDrillDown === 'quality' ? 'IPD项目质量度量看板' :
             activeDrillDown === 'version' ? '版本发布与复用统计' :
             activeDrillDown === 'manpower' ? '人力资源分布详情' : 
@@ -1393,7 +1566,8 @@ export const ProductDashboard: React.FC<ProductDashboardProps> = ({ onSelectProj
             activeDrillDown === 'value_realization' ||
             activeDrillDown === 'online_issues' ||
             activeDrillDown === 'project_cycle' ||
-            activeDrillDown === 'delivery_quality'
+            activeDrillDown === 'delivery_quality' ||
+            activeDrillDown === 'ai_native'
             ? 'max-w-full m-4' : 'max-w-7xl'
           }
         >

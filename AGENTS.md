@@ -1,34 +1,34 @@
-# Repository Guidelines
+# 仓库指南
 
-## Project Structure & Module Organization
-- Root-level Vite + React app. Entry is `index.html` which bootstraps `index.tsx` and renders `App.tsx`.
-- UI building blocks live in `components/` (one component per file, PascalCase names like `ProductDashboard.tsx`).
-- Shared types and constants are in `types.ts` and `constants.tsx`.
-- Build output is generated into `dist/` (do not edit manually).
-- `metadata.json` and `index-test.html` are auxiliary assets used for packaging/testing.
+## 项目结构与模块组织
+- 根目录 Vite + React 应用。入口是 `index.html`，它引导 `index.tsx` 并渲染 `App.tsx`。
+- UI 构建块在 `components/`（每个文件一个组件，PascalCase 命名，如 `ProductDashboard.tsx`）。
+- 共享类型与常量在 `types.ts` 和 `constants.tsx`。
+- 构建输出在 `dist/`（不要手动编辑）。
+- `metadata.json` 和 `index-test.html` 是用于打包/测试的辅助资源。
 
-## Build, Test, and Development Commands
-- `npm install` installs dependencies.
-- `npm run dev` starts the Vite dev server for local development.
-- `npm run build` creates a production build in `dist/`.
-- `npm run preview` serves the production build locally to validate it.
+## 构建、测试与开发命令
+- `npm install` 安装依赖。
+- `npm run dev` 启动本地开发服务。
+- `npm run build` 生成 `dist/` 的生产构建。
+- `npm run preview` 在本地预览生产构建。
 
-## Coding Style & Naming Conventions
-- TypeScript + React with functional components and hooks.
-- Indentation: 2 spaces; string quotes: prefer single quotes to match existing files.
-- Component files use PascalCase; variables and functions use camelCase.
-- Keep JSX `className` strings consistent with existing components (group related utility classes together).
+## 编码风格与命名约定
+- TypeScript + React，使用函数式组件和 hooks。
+- 缩进 2 空格；字符串引号优先单引号以匹配现有文件。
+- 组件文件使用 PascalCase；变量与函数使用 camelCase。
+- JSX `className` 字符串保持与现有组件一致（相关工具类分组）。
 
-## Testing Guidelines
-- No automated test framework is configured yet.
-- Minimum checks for changes: run `npm run dev` and verify key views; run `npm run build` to confirm the app compiles.
-- If adding tests later, follow the naming pattern `*.test.tsx` and place them near related modules.
+## 测试指南
+- 目前未配置自动化测试框架。
+- 最低检查：运行 `npm run dev` 验证关键视图；运行 `npm run build` 确认可编译。
+- 如后续添加测试，使用 `*.test.tsx` 命名并放在相关模块附近。
 
-## Commit & Pull Request Guidelines
-- Commit messages follow a lightweight Conventional Commits style (e.g., `feat: add personal dashboard`, `refactor: rename metric label`, `update`). Keep them short and imperative.
-- PRs should include: a clear summary, linked issue (if any), and UI screenshots or screen recordings for visual changes.
-- Note manual verification steps in the PR description (e.g., `npm run dev`, navigation flows checked).
+## 提交与 PR 指南
+- 提交信息使用简化 Conventional Commits（如 `feat: add personal dashboard`、`refactor: rename metric label`、`update`），简短且使用祈使语气。
+- PR 需包含：清晰摘要、关联 issue（如有）、UI 截图或录屏（视觉变更）。
+- 在 PR 描述中注明手动验证步骤（如 `npm run dev`、已检查的导航流程）。
 
-## Security & Configuration Tips
-- Store API keys in `.env.local` (e.g., `GEMINI_API_KEY=...`) and do not commit secrets.
-- If you introduce new environment variables, document them in `README.md` and keep defaults safe.
+## 安全与配置提示
+- API key 放在 `.env.local`（如 `GEMINI_API_KEY=...`），不要提交。
+- 如新增环境变量，在 `README.md` 中记录并保持默认值安全。

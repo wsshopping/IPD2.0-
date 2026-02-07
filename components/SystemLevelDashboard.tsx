@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, ArrowLeft, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, ChevronDown, RefreshCw, Sparkles, Workflow, Bot, Terminal, TrendingDown, Calendar } from 'lucide-react';
+import { Network, Layers, Server, ShieldCheck, Zap, ChevronRight, Activity, Users, Box, ArrowRight, ArrowLeft, X, Search, Filter, AlertTriangle, CheckCircle2, Briefcase, TrendingUp, LayoutGrid, Flag, Clock, AlertCircle, BrainCircuit, Cpu, Code2, Bug, Repeat, GitBranch, Scale, Microscope, FileWarning, FilterX, Archive, PauseCircle, Star, Hourglass, ChevronDown, RefreshCw, Sparkles, Workflow, Bot, Terminal, TrendingDown, Calendar, Info } from 'lucide-react';
 import { ROSTER } from '../constants';
 
 interface SystemLevelDashboardProps {
@@ -207,6 +207,28 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
   };
 
   const currentSystemData = systemData[systemId as keyof typeof systemData] || systemData.security;
+
+  const clamp = (val: number, min: number, max: number) => Math.max(min, Math.min(max, val));
+
+  const getLineKpis = (lineIndex: number, isClassA: boolean) => {
+    const adoption = clamp((isClassA ? 78 : 62) + lineIndex * 2, 40, 95);
+    const silicon = clamp((isClassA ? 55 : 38) + lineIndex * 3, 20, 85);
+    const autoShare = clamp((isClassA ? 66 : 52) + lineIndex * 2, 30, 90);
+    const aiExec = clamp((isClassA ? 50 : 38) + lineIndex * 2, 20, 85);
+    const aiFirstPass = clamp((isClassA ? 95 : 90) - lineIndex, 75, 98);
+    return { adoption, silicon, autoShare, aiExec, aiFirstPass };
+  };
+
+  const getProjectKpis = (lineKpis: ReturnType<typeof getLineKpis>, projectIndex: number) => {
+    const bump = projectIndex === 0 ? -2 : 4;
+    return {
+      adoption: clamp(lineKpis.adoption + bump, 35, 98),
+      silicon: clamp(lineKpis.silicon + (projectIndex === 0 ? -4 : 8), 15, 90),
+      autoShare: clamp(lineKpis.autoShare + (projectIndex === 0 ? -3 : 6), 20, 95),
+      aiExec: clamp(lineKpis.aiExec + (projectIndex === 0 ? -2 : 5), 15, 95),
+      aiFirstPass: clamp(lineKpis.aiFirstPass + (projectIndex === 0 ? -1 : 1), 70, 99),
+    };
+  };
 
   useEffect(() => {
     if (initialDrillDown) {
@@ -515,15 +537,36 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
             return (
                 <div className="space-y-6">
                     {/* Layer 1: System Overview */}
-                    <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div className="bg-gradient-to-r from-violet-600 to-indigo-600 rounded-xl p-6 text-white shadow-lg relative overflow-visible">
                         {/* Decorative background elements */}
-                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-                        <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl"></div>
+                        <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+                            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+                            <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl"></div>
+                        </div>
                         
                         <div className="relative z-10 grid grid-cols-4 gap-8">
                             {/* Metric 1 */}
                             <div className="flex flex-col gap-1">
-                                <span className="text-indigo-100 text-sm font-medium">全员AI 覆盖率 (Adoption)</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-indigo-100 text-sm font-medium">人员覆盖率 (Adoption)</span>
+                                    <div className="relative group">
+                                        <button
+                                          type="button"
+                                          className="inline-flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                          aria-label="人员覆盖率口径说明"
+                                        >
+                                          <Info className="w-3.5 h-3.5 text-indigo-100/80" />
+                                        </button>
+                                        <div className="absolute top-full left-0 mt-2 w-80 max-w-[70vw] bg-slate-900 text-white text-xs px-2.5 py-2 rounded shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity whitespace-normal z-30 border border-white/10">
+                                            <p className="text-[11px] leading-relaxed">
+                                                口径：最近30天（按PR合并时间，北京时间），个人PR中 AI代码占比≥80%的PR占比≥80% 的人员数 / 最近30天有PR的人员数。
+                                            </p>
+                                            <p className="text-[10px] text-slate-300 mt-1">
+                                                理由：按人员衡量持续采用，以有PR人员为分母，避免未提交人员稀释覆盖率。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-bold">78%</span>
                                     <span className="text-xs bg-white/20 px-2 py-0.5 rounded text-white flex items-center gap-1">
@@ -537,7 +580,26 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
 
                             {/* Metric 2 */}
                             <div className="flex flex-col gap-1">
-                                <span className="text-indigo-100 text-sm font-medium">平均硅含量 (Silicon Content)</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-indigo-100 text-sm font-medium">代码覆盖率 / 硅基含量 (Code Coverage)</span>
+                                    <div className="relative group">
+                                        <button
+                                          type="button"
+                                          className="inline-flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                          aria-label="代码覆盖率口径说明"
+                                        >
+                                          <Info className="w-3.5 h-3.5 text-indigo-100/80" />
+                                        </button>
+                                        <div className="absolute top-full left-0 mt-2 w-72 max-w-[70vw] bg-slate-900 text-white text-xs px-2.5 py-2 rounded shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity whitespace-normal z-30 border border-white/10">
+                                            <p className="text-[11px] leading-relaxed">
+                                                口径：最近30天（按PR合并时间，北京时间），AI代码行数 / 总代码行数。
+                                            </p>
+                                            <p className="text-[10px] text-slate-300 mt-1">
+                                                理由：按行数加权，反映真实代码体量贡献，避免小PR偏移。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-bold">42%</span>
                                     <span className="text-sm text-indigo-200">/ 目标 50%</span>
@@ -549,17 +611,36 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
 
                             {/* Metric 3 */}
                             <div className="flex flex-col gap-1">
-                                <span className="text-indigo-100 text-sm font-medium">累计节省工时 (Hours Saved)</span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-indigo-100 text-sm font-medium">节省人日（估算）(Person-days Saved)</span>
+                                    <div className="relative group">
+                                        <button
+                                          type="button"
+                                          className="inline-flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                          aria-label="节省人日口径说明"
+                                        >
+                                          <Info className="w-3.5 h-3.5 text-indigo-100/80" />
+                                        </button>
+                                        <div className="absolute top-full left-0 mt-2 w-[22rem] max-w-[70vw] bg-slate-900 text-white text-xs px-2.5 py-2 rounded shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity whitespace-normal z-30 border border-white/10">
+                                            <p className="text-[11px] leading-relaxed">
+                                                口径：累计所有在研项目（已完成+进行中阶段）。节省人日 = Σ max(0, 计划基线天数 − AI模式下实际/预测天数) × 阶段平均投入人力。
+                                            </p>
+                                            <p className="text-[10px] text-slate-300 mt-1">
+                                                注：进行中阶段使用 AI 模式预测周期；未开始阶段不计入，后续会随实际收敛。该指标表示可释放产能，不等于减少编制。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="flex items-baseline gap-2">
                                     <span className="text-4xl font-bold">12,450</span>
-                                    <span className="text-sm text-indigo-200">h</span>
+                                    <span className="text-sm text-indigo-200">人日</span>
                                 </div>
                                 <div className="text-xs text-indigo-200 mt-1 flex items-center gap-1">
-                                    <Users className="w-3 h-3" /> 相当于节省 75 人/月
+                                    <Users className="w-3 h-3" /> 约释放 75 人/月产能
                                 </div>
                             </div>
 
-                            {/* Metric 4 - Quality Impact (UPDATED) */}
+                            {/* Metric 4 - Automation Quality */}
                             <div 
                                 className="flex flex-col gap-1 border-l border-white/10 pl-8 relative group cursor-pointer"
                                 onClick={() => setAiAutomationDetail(true)}
@@ -567,19 +648,53 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                 <div className="absolute inset-0 -m-2 bg-white/0 group-hover:bg-white/10 transition-colors rounded-lg"></div>
                                 <div className="relative z-10">
                                      <div className="flex items-center gap-1">
-                                        <span className="text-indigo-100 text-sm font-medium">自动化案例数</span>
+                                        <span className="text-indigo-100 text-sm font-medium">自动化案例</span>
+                                        <div className="relative group">
+                                            <button
+                                              type="button"
+                                              className="inline-flex items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                                              aria-label="自动化案例口径说明"
+                                            >
+                                              <Info className="w-3.5 h-3.5 text-indigo-100/80" />
+                                            </button>
+                                            <div className="absolute top-full left-0 mt-2 w-80 max-w-[70vw] bg-slate-900 text-white text-xs px-2.5 py-2 rounded shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity whitespace-normal z-30 border border-white/10">
+                                                <div className="text-[11px] leading-relaxed space-y-1">
+                                                    <p>口径（近30天，按执行时间，北京时间）：</p>
+                                                    <p>1) 自动化案例占比 = 活跃自动化用例数 / 活跃全部用例数（排除历史闲置，反映真实覆盖）。</p>
+                                                    <p>2) AI 自动化执行占比 = AI 自动化执行次数 / 自动化执行总次数（按次数体现使用强度）。</p>
+                                                    <p>3) AI 自动化首次通过率 = AI 用例首跑通过数 / 首跑总数（按用例衡量质量，避免高频冲高）。</p>
+                                                </div>
+                                                <p className="text-[10px] text-slate-300 mt-1">
+                                                    风险提示：若近30天执行主要来自历史存量且非AI用例，AI自动化执行占比会被稀释。
+                                                </p>
+                                            </div>
+                                        </div>
                                         <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white transition-colors" />
                                      </div>
-                                    <div className="flex items-baseline gap-2 mt-1">
-                                        <div className="text-3xl font-bold">15,800</div>
-                                    </div>
+                                    <div className="text-xs text-indigo-200 mt-1">总计 15,800 案例</div>
                                     
-                                    <div className="flex items-center justify-between text-indigo-100 text-sm font-medium mt-3 mb-1">
-                                        <span>AI 自动化执行率</span>
+                                    <div className="flex items-center justify-between text-indigo-100 text-xs font-medium mt-3 mb-1">
+                                        <span>自动化案例占比</span>
+                                        <span className="text-sky-200 font-bold">62%</span>
+                                    </div>
+                                    <div className="w-full bg-black/20 h-1.5 rounded-full overflow-hidden">
+                                        <div className="bg-sky-400 h-full rounded-full" style={{width: '62%'}}></div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-indigo-100 text-xs font-medium mt-2 mb-1">
+                                        <span>AI 自动化案例执行占比</span>
                                         <span className="text-emerald-300 font-bold">45%</span>
                                     </div>
                                     <div className="w-full bg-black/20 h-1.5 rounded-full overflow-hidden">
                                         <div className="bg-emerald-400 h-full rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" style={{width: '45%'}}></div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between text-indigo-100 text-xs font-medium mt-2 mb-1">
+                                        <span>AI 自动化案例首次通过率</span>
+                                        <span className="text-violet-200 font-bold">94%</span>
+                                    </div>
+                                    <div className="w-full bg-black/20 h-1.5 rounded-full overflow-hidden">
+                                        <div className="bg-violet-400 h-full rounded-full" style={{width: '94%'}}></div>
                                     </div>
                                 </div>
                             </div>
@@ -606,11 +721,10 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                             <thead className="bg-slate-50 text-slate-500 font-medium">
                                 <tr>
                                     <th className="p-4 w-64">产线 / 项目版本</th>
-                                    <th className="p-4 w-48">产线模式 (Strategy)</th>
                                     <th className="p-4 w-80">项目周期对比 (Original vs AI)</th>
-                                    <th className="p-4 w-48">硅含量 (Silicon)</th>
-                                    <th className="p-4 text-center">用例通过率</th>
-                                    <th className="p-4">自动化 (Gen/Exec)</th>
+                                    <th className="p-4 w-48">人员覆盖率</th>
+                                    <th className="p-4 w-48">硅基含量</th>
+                                    <th className="p-4 w-40">自动化案例</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -620,8 +734,7 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                     // Performance/Legacy lines -> Class B
                                     const isClassA = ['xdr', 'ai-sec', 'fengyun', 'tianwen', 'digital-human', 'embodied-ai', 'managed-cloud'].includes(line.id);
                                     
-                                    const modeLabel = isClassA ? 'A类 (顶尖模型)' : 'B类 (自研CoStrict)';
-                                    const modeColor = isClassA ? 'violet' : 'blue';
+                                    const modeLabel = isClassA ? 'A类' : 'B类';
                                     const ModeIcon = isClassA ? Sparkles : Terminal;
 
                                     // Generate evolutionary projects for this specific mode
@@ -632,10 +745,6 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                             type: 'native',
                                             baselineDays: 120, 
                                             actualDays: isClassA ? 90 : 108, 
-                                            silicon: isClassA ? 35 : 20,
-                                            passRate: 90,
-                                            autoGen: 1200,
-                                            autoExec: 2500,
                                             startDate: '2024-01-15',
                                             originalEndDate: '2024-05-15',
                                             actualEndDate: isClassA ? '2024-04-15' : '2024-05-03'
@@ -645,37 +754,75 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                             type: 'native',
                                             baselineDays: 120, 
                                             actualDays: isClassA ? 75 : 88, 
-                                            silicon: isClassA ? 65 : 45,
-                                            passRate: 98,
-                                            autoGen: 4500,
-                                            autoExec: 5200,
                                             startDate: '2024-06-01',
                                             originalEndDate: '2024-10-01',
                                             actualEndDate: isClassA ? '2024-08-15' : '2024-08-28'
                                         }
                                     ];
+                                    const hasLineSummary = projects.length > 1;
 
                                     return (
                                         <React.Fragment key={lineIdx}>
-                                            {/* Product Line Header Row - Shows the assigned Mode */}
-                                            <tr className="bg-slate-50/80 border-t border-slate-200">
-                                                <td colSpan={6} className="p-3 pl-4">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-2">
-                                                            <Layers className="w-3 h-3 text-slate-400" />
-                                                            {line.name}
-                                                        </span>
-                                                        <span className={`text-[10px] px-2 py-0.5 rounded border flex items-center gap-1 font-bold ${isClassA ? 'bg-violet-50 text-violet-700 border-violet-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
-                                                            <ModeIcon className="w-3 h-3" />
-                                                            当前模式: {modeLabel}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            {/* Product Line Summary Row */}
+                                            {hasLineSummary && (() => {
+                                                const lineKpis = getLineKpis(lineIdx, isClassA);
+                                                return (
+                                                    <tr className="bg-slate-50/80 border-t border-slate-200">
+                                                        <td className="p-3 pl-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <Layers className="w-3 h-3 text-slate-400" />
+                                                                <span className="font-bold text-slate-800 text-xs uppercase tracking-wider">
+                                                                    {line.name}
+                                                                </span>
+                                                                <span className={`text-[10px] px-2 py-0.5 rounded border inline-flex items-center gap-1 font-bold ${isClassA ? 'bg-violet-50 text-violet-700 border-violet-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                                                                    <ModeIcon className="w-3 h-3" />
+                                                                    {modeLabel}
+                                                                </span>
+                                                            </div>
+                                                            <div className="text-[10px] text-slate-400 mt-1">产线汇总</div>
+                                                        </td>
+                                                        <td className="p-3 text-xs text-slate-400">—</td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex-1">
+                                                                    <div className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} style={{width: `${lineKpis.adoption}%`}}></div>
+                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-600 w-9">{lineKpis.adoption}%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex-1">
+                                                                    <div className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} style={{width: `${lineKpis.silicon}%`}}></div>
+                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-600 w-9">{lineKpis.silicon}%</span>
+                                                            </div>
+                                                        </td>
+                                                        <td className="p-3">
+                                                            <div className="text-[10px] text-slate-600 space-y-0.5">
+                                                                <div className="flex items-center justify-between gap-1">
+                                                                    <span className="text-slate-500">案例占比</span>
+                                                                    <span className="font-bold text-slate-700">{lineKpis.autoShare}%</span>
+                                                                </div>
+                                                                <div className="flex items-center justify-between gap-1">
+                                                                    <span className="text-slate-500">AI执行占比</span>
+                                                                    <span className="font-bold text-slate-700">{lineKpis.aiExec}%</span>
+                                                                </div>
+                                                                <div className="flex items-center justify-between gap-1">
+                                                                    <span className="text-slate-500">AI首通率</span>
+                                                                    <span className="font-bold text-slate-700">{lineKpis.aiFirstPass}%</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })()}
                                             
                                             {/* Project Rows */}
                                             {projects.map((proj, pIdx) => {
                                                 const efficiency = Math.round(((proj.baselineDays - proj.actualDays) / proj.baselineDays) * 100);
+                                                const lineKpis = getLineKpis(lineIdx, isClassA);
+                                                const projectKpis = getProjectKpis(lineKpis, pIdx);
                                                 
                                                 return (
                                                     <tr key={`${lineIdx}-${pIdx}`} className={`hover:bg-slate-50 transition-colors ${isClassA ? 'bg-violet-50/10' : 'bg-blue-50/10'}`}>
@@ -685,16 +832,9 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                                                 <span className={`font-medium ${isClassA ? 'text-violet-700 font-bold' : 'text-blue-700 font-bold'}`}>
                                                                     {proj.name}
                                                                 </span>
-                                                            </div>
-                                                        </td>
-                                                        {/* Strategy Column - Updated */}
-                                                        <td className="p-4">
-                                                            <div className="flex flex-col items-start">
-                                                                <span className={`text-xs px-2 py-0.5 rounded font-bold border ${isClassA ? 'text-violet-700 bg-violet-50 border-violet-200' : 'text-blue-700 bg-blue-50 border-blue-200'}`}>
-                                                                    {isClassA ? 'A类' : 'B类'}
-                                                                </span>
-                                                                <span className="text-[10px] text-slate-400 mt-0.5 scale-90 origin-left">
-                                                                    {isClassA ? '顶尖模型' : '自研CoStrict'}
+                                                                <span className={`text-[10px] px-2 py-0.5 rounded border inline-flex items-center gap-1 font-bold ${isClassA ? 'bg-violet-50 text-violet-700 border-violet-100' : 'bg-blue-50 text-blue-700 border-blue-100'}`}>
+                                                                    <ModeIcon className="w-3 h-3" />
+                                                                    {modeLabel}
                                                                 </span>
                                                             </div>
                                                         </td>
@@ -754,33 +894,40 @@ export const SystemLevelDashboard: React.FC<SystemLevelDashboardProps> = ({ onSe
                                                             </div>
                                                         </td>
 
+                                                        {/* Adoption */}
+                                                        <td className="p-4">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex-1">
+                                                                    <div className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} style={{width: `${projectKpis.adoption}%`}}></div>
+                                                                </div>
+                                                                <span className="text-xs font-bold text-slate-600 w-8">{projectKpis.adoption}%</span>
+                                                            </div>
+                                                        </td>
+
                                                         {/* Silicon Content */}
                                                         <td className="p-4">
                                                             <div className="flex items-center gap-2">
                                                                 <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden flex-1">
-                                                                    <div className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} style={{width: `${proj.silicon}%`}}></div>
+                                                                    <div className={`h-full rounded-full ${isClassA ? 'bg-violet-500' : 'bg-blue-500'}`} style={{width: `${projectKpis.silicon}%`}}></div>
                                                                 </div>
-                                                                <span className="text-xs font-bold text-slate-600 w-8">{proj.silicon}%</span>
-                                                            </div>
-                                                        </td>
-
-                                                        {/* Quality */}
-                                                        <td className="p-4 text-center">
-                                                            <div className={`inline-flex items-center px-2 py-1 rounded border text-xs font-bold ${proj.passRate > 90 ? 'bg-green-50 border-green-200 text-green-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
-                                                                {proj.passRate}%
+                                                                <span className="text-xs font-bold text-slate-600 w-8">{projectKpis.silicon}%</span>
                                                             </div>
                                                         </td>
 
                                                         {/* Automation */}
-                                                        <td className="p-4">
-                                                            <div className="text-xs">
-                                                                <div className="flex items-center gap-2 text-slate-600 mb-1">
-                                                                    <Bot className="w-3 h-3 text-slate-400" />
-                                                                    <span>Gen: <span className="font-mono">{proj.autoGen}</span></span>
+                                                        <td className="p-3">
+                                                            <div className="text-[10px] text-slate-600 space-y-0.5">
+                                                                <div className="flex items-center justify-between gap-1">
+                                                                    <span className="text-slate-500">案例占比</span>
+                                                                    <span className="font-bold text-slate-700">{projectKpis.autoShare}%</span>
                                                                 </div>
-                                                                <div className="flex items-center gap-2 text-slate-600">
-                                                                    <CheckCircle2 className="w-3 h-3 text-slate-400" />
-                                                                    <span>Exec: <span className="font-mono">{proj.autoExec}</span></span>
+                                                                <div className="flex items-center justify-between gap-1">
+                                                                    <span className="text-slate-500">AI执行占比</span>
+                                                                    <span className="font-bold text-slate-700">{projectKpis.aiExec}%</span>
+                                                                </div>
+                                                                <div className="flex items-center justify-between gap-1">
+                                                                    <span className="text-slate-500">AI首通率</span>
+                                                                    <span className="font-bold text-slate-700">{projectKpis.aiFirstPass}%</span>
                                                                 </div>
                                                             </div>
                                                         </td>
