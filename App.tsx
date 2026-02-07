@@ -8,7 +8,7 @@ import { SystemLevelDashboard } from './components/SystemLevelDashboard';
 import { PersonalDashboard } from './components/PersonalDashboard';
 import { AIAssistant } from './components/AIAssistant';
 import { BarChart3, Map, Layers, LayoutDashboard, PieChart, Network, UserCircle } from 'lucide-react';
-import { MOCK_PROJECT } from './constants';
+import { MOCK_PROJECT } from './mock';
 
 const App: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('portfolio-dashboard');

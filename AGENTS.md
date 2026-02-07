@@ -1,9 +1,19 @@
 # 仓库指南
 
+## 项目意图与背景（对内）
+- 产品目标：交付一个可钻取的 IPD 决策驾驶舱，覆盖组合→系统→产线→项目四层视图。
+- 当前阶段：以 Mock 数据驱动前端，优先验证信息架构、交互路径、指标编排与可解释性。
+- 工程目标：保持“数据层与展示层解耦”，便于后续替换为真实 API。
+- 核心痛点：数据口径分散、跨域分析链路长、业务与研发指标割裂、页面扩展时耦合风险高。
+- 演进方向：先稳住 `mock/index.ts` 统一入口，再逐步引入真实数据仓/API 与权限控制。
+
+
 ## 项目结构与模块组织
 - 根目录 Vite + React 应用。入口是 `index.html`，它引导 `index.tsx` 并渲染 `App.tsx`。
 - UI 构建块在 `components/`（每个文件一个组件，PascalCase 命名，如 `ProductDashboard.tsx`）。
-- 共享类型与常量在 `types.ts` 和 `constants.tsx`。
+- 共享类型在 `types.ts`，业务 Mock 数据在 `mock/`（通过 `mock/index.ts` 聚合导出）。
+- `mock/` 建议按领域分层：`project.ts`（项目）、`roster.ts`（人力）、`product.ts`（产线仪表盘）、`system.ts`（系统级质量）、`portfolio.ts`（组合仪表盘钻取）。
+- 新增或重命名 Mock 文件后，必须在 `mock/index.ts` 同步导出，确保统一导入入口稳定。
 - 构建输出在 `dist/`（不要手动编辑）。
 - `metadata.json` 和 `index-test.html` 是用于打包/测试的辅助资源。
 
